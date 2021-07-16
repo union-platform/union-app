@@ -1,11 +1,11 @@
-# SPDX-FileCopyrightText: 2018 Serokell <https://serokell.io>
+# SPDX-FileCopyrightText: 2021 Union
 #
 # SPDX-License-Identifier: CC0-1.0
 
 # top-most EditorConfig file
 root = true
 
-[*.hs]
+[*.{hs, ts, tsx, scss, json, js, svg}]
 indent_style = space
 indent_size = 2
 end_of_line = lf
