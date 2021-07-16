@@ -1,1 +1,6 @@
-# See https://www.notion.so/serokell/gitignore-3d45b853c4494fa282dc04269f851b2e
+# SPDX-FileCopyrightText: 2021 Union
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+# Instead of adding ignores for your editor/os/tool-specific files
+# you should add them to your global ignore file `~/.config/git/ignore`

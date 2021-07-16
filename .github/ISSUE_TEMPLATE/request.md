@@ -1,8 +1,8 @@
 ---
-name: Task
-about: Suggest a task for this project
+name: Request
+about: Suggest an improvement for this product
 title: ''
-labels: ''
+labels: enhancement
 assignees: ''
 
 ---

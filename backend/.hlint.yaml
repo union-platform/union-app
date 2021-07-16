@@ -1,8 +1,6 @@
-# SPDX-FileCopyrightText: 2018 Serokell <https://serokell.io>
+# SPDX-FileCopyrightText: 2021 Union
 #
 # SPDX-License-Identifier: CC0-1.0
-
-# Default hlint config used in Serokell
 
 ###########################################################################
 # Settings
@@ -10,40 +8,8 @@
 
 - arguments: [-XTypeApplications, -XRecursiveDo]
 
-# These are just too annoying
-- ignore: { name: Redundant do }
-- ignore: { name: Redundant bracket }
-- ignore: { name: Redundant lambda }
-- ignore: { name: Redundant $ }
-- ignore: { name: Redundant flip }
-- ignore: { name: Move brackets to avoid $ }
-
-# Losing variable names can be not-nice
-- ignore: { name: Eta reduce }
-- ignore: { name: Avoid lambda }
-
-# Humans know better
-- ignore: { name: Use camelCase }
-- ignore: { name: Use const }
-- ignore: { name: Use section }
-- ignore: { name: Use if }
-- ignore: { name: Use notElem }
-- ignore: { name: Use fromMaybe }
-- ignore: { name: Use maybe }
-- ignore: { name: Use fmap }
-- ignore: { name: Use foldl }
-- ignore: { name: "Use :" }
-- ignore: { name: Use ++ }
-- ignore: { name: Use || }
-- ignore: { name: Use && }
-- ignore: { name: 'Use ?~' }
-- ignore: { name: Use <$> }
-
 # Sometimes [Char] is okay (if it means "a sequence of characters")
 - ignore: { name: Use String }
-
-# Sometimes TemplateHaskell is needed to please stylish-haskell
-- ignore: { name: Unused LANGUAGE pragma }
 
 # Some 'data' records will be extended with more fields later,
 # so they shouldn't be replaced with 'newtype' blindly

@@ -1,19 +1,23 @@
 ---
-name: Bug report
+name: Bug
 about: If you think our software behaves not the way it should, report a bug
-title: "[BUG]"
-labels: ''
+title: "[BUG] "
+labels: bug
 assignees: ''
 
 ---
 
-# Description
+<!--
+Note: Please search to see if an issue already exists for the bug you encountered.
+-->
+
+## Description
 
 <!--
 A clear and concise description of what the bug is.
 -->
 
-# To Reproduce
+## To Reproduce
 
 Steps to reproduce the behavior:
 <!--
@@ -23,18 +27,18 @@ Steps to reproduce the behavior:
 4. See error
 -->
 
-# Expected behavior
+## Expected behavior
 
 <!--
 A clear and concise description of what you expected to happen.
 -->
 
-# Environment
+## Environment
 
-- OS
-- branch/revision
+- OS:
+- Browser:
 
-# Additional context
+## Additional context
 
 <!--
 Add any other context about the problem here.

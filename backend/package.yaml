@@ -1,0 +1,136 @@
+# SPDX-FileCopyrightText: 2021 Union
+#
+# SPDX-License-Identifier: CC0-1.0
+
+name: union
+## Version is 0 by default to indicate that the package is not ready to be used
+## and has never been released/uploaded to Hackage.
+## When you think it's ready to be released,
+## set the version to something like 0.1.0.
+version: 0
+author: Union
+github: union-platform/union-app
+synopsis: This is backend server for Union platform.
+description: Please see the README on GitHub at <https://github.com/union-platform/union-app#readme>
+category: web
+copyright: 2021 Union
+license-file: ../LICENSE
+
+extra-source-files:
+  - README.md
+  - ../CHANGES.md
+
+# We enable all extensions that we consider harmless by default.
+default-extensions:
+  - AllowAmbiguousTypes
+  - BangPatterns
+  - BlockArguments
+  - ConstraintKinds
+  - DataKinds
+  - DefaultSignatures
+  - DeriveAnyClass
+  - DeriveDataTypeable
+  - DeriveFoldable
+  - DeriveFunctor
+  - DeriveGeneric
+  - DeriveTraversable
+  - DerivingStrategies
+  - DerivingVia
+  - EmptyCase
+  - FlexibleContexts
+  - FlexibleInstances
+  - GADTs
+  - GeneralizedNewtypeDeriving
+  - LambdaCase
+  - MultiParamTypeClasses
+  - MultiWayIf
+  - NamedFieldPuns
+  - NegativeLiterals
+  - NoImplicitPrelude
+  - NumDecimals
+  - OverloadedLabels
+  - OverloadedStrings
+  - PatternSynonyms
+  - PolyKinds
+  - QuasiQuotes
+  - RankNTypes
+  - RecordWildCards
+  - RecursiveDo
+  - ScopedTypeVariables
+  - StandaloneDeriving
+  - StrictData
+  - TemplateHaskell
+  - TupleSections
+  - TypeApplications
+  - TypeFamilies
+  - TypeOperators
+  - UndecidableInstances
+  - UndecidableSuperClasses
+  - ViewPatterns
+
+ghc-options:
+  - -Weverything
+  - -Wno-missing-exported-signatures
+  - -Wno-missing-import-lists
+  - -Wno-missed-specialisations
+  - -Wno-all-missed-specialisations
+  - -Wno-unsafe
+  - -Wno-safe
+  - -Wno-missing-local-signatures
+  - -Wno-monomorphism-restriction
+  - -Wno-implicit-prelude
+
+when:
+  - condition: impl(ghc >= 8.10.0)
+    ghc-options:
+      - -Wno-prepositive-qualified-module
+      - -Wno-inferred-safe-imports
+      - -Wno-missing-safe-haskell-mode
+
+dependencies:
+  - name: base
+    mixin: [hiding (Prelude)]
+    version: "< 4.15"
+  - name: universum
+    mixin: [(Universum as Prelude), (Universum.Unsafe as Unsafe)]
+
+library:
+  source-dirs: src
+  generated-other-modules:
+    - Paths_union
+
+executables:
+  union-server:
+    main: Main.hs
+    source-dirs: app
+
+tests:
+  union-tests:
+    main: Main.hs
+    source-dirs: tests
+    build-tools: tasty-discover:tasty-discover
+
+    ghc-options:
+      # Non-exhaustive patterns are ok and useful in tests.
+      - -Wno-incomplete-patterns
+      # tasty runs tests in parallel,
+      # so using multiple threads should be useful.
+      - -threaded
+      # should be harmless, but helps some people analyse something :shrug:
+      - -eventlog
+
+      # Enable -N to use multiple threads.
+      # Increase allocation area by using the recommended -A64m option.
+      # Also increase the allocation area for large objects with -AL256m,
+      # since this area is shared between all threads and thus with high -N
+      # values get used up too soon.
+      #
+      # With these options tests usually run faster.
+      #
+      # Weird quoting is required for cabal to correctly pass this
+      # as _one_ option, otherwise it splits by spaces.
+      - '"-with-rtsopts=-N -A64m -AL256m"'
+
+    dependencies:
+      - union
+      - tasty
