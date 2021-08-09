@@ -50,3 +50,7 @@ you must be able to justify that.
 
 - [ ] My commits comply with [the policy used in Union](https://github.com/union-platform/guides/blob/master/commits.md).
 - [ ] My code complies with the [styles guide](https://github.com/union-platform/guides/blob/master/README.md#programming-languages).
+
+#### Before merging (mandatory)
+- [ ] Check for `fixup!` or `squash!` commits in this branch
+- [ ] Check __target__  branch of PR is set correctly
