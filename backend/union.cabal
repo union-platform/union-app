@@ -1,0 +1,265 @@
+cabal-version: 2.4
+
+-- This file has been generated from package.yaml by hpack version 0.34.4.
+--
+-- see: https://github.com/sol/hpack
+
+name:           union
+version:        0.1.0
+synopsis:       This is backend server for Union platform.
+description:    Please see the README on GitHub at <https://github.com/union-platform/union-app#readme>
+category:       web
+homepage:       https://github.com/union-platform/union-app#readme
+bug-reports:    https://github.com/union-platform/union-app/issues
+author:         Union
+maintainer:     Union
+copyright:      2021 Union
+license:        AGPL-3.0-or-later
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/union-platform/union-app
+
+library
+  exposed-modules:
+      Core
+      Core.Db
+      Core.Error
+      Core.Has
+      Core.Json
+      Core.Jwt
+      Core.Measure
+      Core.Monad
+      Core.Random
+      Core.Servant
+      Core.Swagger
+      Core.Time
+      Union
+      Union.API
+      Union.Application
+      Union.Configuration
+  other-modules:
+      Paths_union
+  autogen-modules:
+      Paths_union
+  hs-source-dirs:
+      src
+  default-extensions:
+      AllowAmbiguousTypes
+      BangPatterns
+      BlockArguments
+      ConstraintKinds
+      DataKinds
+      DefaultSignatures
+      DeriveAnyClass
+      DeriveDataTypeable
+      DeriveFoldable
+      DeriveFunctor
+      DeriveGeneric
+      DeriveTraversable
+      DerivingStrategies
+      DerivingVia
+      EmptyCase
+      FlexibleContexts
+      FlexibleInstances
+      GADTs
+      GeneralizedNewtypeDeriving
+      ImportQualifiedPost
+      InstanceSigs
+      LambdaCase
+      MultiParamTypeClasses
+      MultiWayIf
+      NamedFieldPuns
+      NegativeLiterals
+      NoImplicitPrelude
+      NumDecimals
+      OverloadedLabels
+      OverloadedStrings
+      PatternSynonyms
+      PolyKinds
+      QuasiQuotes
+      RankNTypes
+      RecordWildCards
+      RecursiveDo
+      ScopedTypeVariables
+      StandaloneDeriving
+      StrictData
+      TemplateHaskell
+      TupleSections
+      TypeApplications
+      TypeFamilies
+      TypeOperators
+      UndecidableInstances
+      UndecidableSuperClasses
+      ViewPatterns
+  ghc-options: -fwarn-tabs -Weverything -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-unused-do-bind -Wno-implicit-prelude -Wincomplete-uni-patterns -Wincomplete-record-updates -Wpartial-fields -Widentities -Wredundant-constraints -Wmissing-export-lists
+  build-depends:
+      aeson
+    , aeson-casing
+    , base >=4.10 && <5
+    , containers
+    , ekg-core
+    , hasql
+    , hasql-pool
+    , http-api-data
+    , http-media
+    , jwt
+    , mtl
+    , openapi3
+    , optparse-applicative
+    , prometheus-client
+    , random
+    , rel8
+    , relude
+    , safe-exceptions
+    , scientific
+    , servant
+    , servant-server
+    , time
+    , unliftio-core
+    , unordered-containers
+    , wai
+    , warp
+    , yaml
+  if impl(ghc >= 8.10.0)
+    ghc-options: -Wno-prepositive-qualified-module -Wno-inferred-safe-imports -Wno-missing-safe-haskell-mode
+  default-language: Haskell2010
+
+executable union-server
+  main-is: Main.hs
+  other-modules:
+      Paths_union
+  hs-source-dirs:
+      app
+  default-extensions:
+      AllowAmbiguousTypes
+      BangPatterns
+      BlockArguments
+      ConstraintKinds
+      DataKinds
+      DefaultSignatures
+      DeriveAnyClass
+      DeriveDataTypeable
+      DeriveFoldable
+      DeriveFunctor
+      DeriveGeneric
+      DeriveTraversable
+      DerivingStrategies
+      DerivingVia
+      EmptyCase
+      FlexibleContexts
+      FlexibleInstances
+      GADTs
+      GeneralizedNewtypeDeriving
+      ImportQualifiedPost
+      InstanceSigs
+      LambdaCase
+      MultiParamTypeClasses
+      MultiWayIf
+      NamedFieldPuns
+      NegativeLiterals
+      NoImplicitPrelude
+      NumDecimals
+      OverloadedLabels
+      OverloadedStrings
+      PatternSynonyms
+      PolyKinds
+      QuasiQuotes
+      RankNTypes
+      RecordWildCards
+      RecursiveDo
+      ScopedTypeVariables
+      StandaloneDeriving
+      StrictData
+      TemplateHaskell
+      TupleSections
+      TypeApplications
+      TypeFamilies
+      TypeOperators
+      UndecidableInstances
+      UndecidableSuperClasses
+      ViewPatterns
+  ghc-options: -fwarn-tabs -Weverything -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-unused-do-bind -Wno-implicit-prelude -Wincomplete-uni-patterns -Wincomplete-record-updates -Wpartial-fields -Widentities -Wredundant-constraints -Wmissing-export-lists -threaded -rtsopts "-with-rtsopts=-T -N"
+  build-depends:
+      base >=4.10 && <5
+    , relude
+    , union
+    , with-utf8
+  if impl(ghc >= 8.10.0)
+    ghc-options: -Wno-prepositive-qualified-module -Wno-inferred-safe-imports -Wno-missing-safe-haskell-mode
+  default-language: Haskell2010
+
+test-suite union-tests
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Test.Gen
+      Test.Jwt
+      Test.Mock
+      Paths_union
+  hs-source-dirs:
+      tests
+  default-extensions:
+      AllowAmbiguousTypes
+      BangPatterns
+      BlockArguments
+      ConstraintKinds
+      DataKinds
+      DefaultSignatures
+      DeriveAnyClass
+      DeriveDataTypeable
+      DeriveFoldable
+      DeriveFunctor
+      DeriveGeneric
+      DeriveTraversable
+      DerivingStrategies
+      DerivingVia
+      EmptyCase
+      FlexibleContexts
+      FlexibleInstances
+      GADTs
+      GeneralizedNewtypeDeriving
+      ImportQualifiedPost
+      InstanceSigs
+      LambdaCase
+      MultiParamTypeClasses
+      MultiWayIf
+      NamedFieldPuns
+      NegativeLiterals
+      NoImplicitPrelude
+      NumDecimals
+      OverloadedLabels
+      OverloadedStrings
+      PatternSynonyms
+      PolyKinds
+      QuasiQuotes
+      RankNTypes
+      RecordWildCards
+      RecursiveDo
+      ScopedTypeVariables
+      StandaloneDeriving
+      StrictData
+      TemplateHaskell
+      TupleSections
+      TypeApplications
+      TypeFamilies
+      TypeOperators
+      UndecidableInstances
+      UndecidableSuperClasses
+      ViewPatterns
+  ghc-options: -fwarn-tabs -Weverything -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-unused-do-bind -Wno-implicit-prelude -Wincomplete-uni-patterns -Wincomplete-record-updates -Wpartial-fields -Widentities -Wredundant-constraints -Wmissing-export-lists -Wno-incomplete-patterns -Wno-incomplete-uni-patterns -threaded -eventlog "-with-rtsopts=-N -A64m -AL256m"
+  build-depends:
+      base >=4.10 && <5
+    , hedgehog
+    , jwt
+    , relude
+    , tasty
+    , tasty-hedgehog
+    , union
+  if impl(ghc >= 8.10.0)
+    ghc-options: -Wno-prepositive-qualified-module -Wno-inferred-safe-imports -Wno-missing-safe-haskell-mode
+  default-language: Haskell2010

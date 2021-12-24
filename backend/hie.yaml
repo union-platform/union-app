@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: 2021 Union
+#
+# SPDX-License-Identifier: CC0-1.0
+
+cradle:
+  stack:
+    - path: "./src"
+      component: "union:lib"
+
+    - path: "./app/Main.hs"
+      component: "union:exe:union-server"
+
+    - path: "./app/Paths_union.hs"
+      component: "union:exe:union-server"
+
+    - path: "./tests"
+      component: "union:test:union-tests"
+
+dependencies:
+  - ./package.yaml
+  - ./stack.yaml
