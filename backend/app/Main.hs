@@ -6,5 +6,14 @@ module Main
   ( main
   ) where
 
+import Relude
+
+import Main.Utf8 (withUtf8)
+
+import Union (runUnion, union, unionOpts)
+
+
 main :: IO ()
-main = print "hi"
+main = withUtf8 $ do
+  opts <- unionOpts
+  runUnion opts union

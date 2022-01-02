@@ -11,10 +11,6 @@
 # Sometimes [Char] is okay (if it means "a sequence of characters")
 - ignore: { name: Use String }
 
-# Some 'data' records will be extended with more fields later,
-# so they shouldn't be replaced with 'newtype' blindly
-- ignore: { name: Use newtype instead of data }
-
 ###########################################################################
 # Various stuff
 ###########################################################################
@@ -31,6 +27,7 @@
         * If 'both' is used on 'Either' here, replace it with 'chosen'.
 
 - warn: { lhs: either (const True) (const False), rhs: isLeft }
+
 - warn: { lhs: either (const False) (const True), rhs: isRight }
 
 - warn: { lhs: map fst &&& map snd, rhs: unzip }

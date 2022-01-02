@@ -8,21 +8,26 @@
 
 ## Reporting Issues
 
-Please [open an issue](https://github.com/union-platform/union-app/issues/new/choose)
-if you find a bug or have a feature request.
+Please [open an issue][issues] if you find a bug or have a feature request.
 Note: you need to login (e. g. using your GitHub account) first.
-Before submitting a bug report or feature request, check to make sure it hasn't already been submitted
+Before submitting a bug report or feature request, check to make sure it hasn't
+already been submitted
 
 The more detailed your report is, the faster it can be resolved.
-If you report a bug, please provide steps to reproduce this bug and revision of code in which this bug reproduces.
+If you report a bug, please provide steps to reproduce this bug and revision of
+code in which this bug reproduces.
+
 
 ## Code
 
 If you would like to contribute code to fix a bug, add a new feature, or
 otherwise improve our product, pull requests are most welcome.
 
-Our pull request template contains a [checklist](.github/pull_request_template.md#white_check_mark-checklist-for-your-pull-request) of acceptance criteria for your pull request.
-Please read it before you start contributing and make sure your contributions adhere to this checklist.
+Our pull request template contains a [checklist][pr-template] of acceptance
+criteria for your pull request.
+Please read it before you start contributing and make sure your contributions
+adhere to this checklist.
+
 
 ## Legal
 
@@ -57,13 +62,16 @@ but, basically, it all boils down to the following:
     If the file contains the entire license in its header, it is best to move the
     text to a separate file in the `LICENSES` directory and leave a reference.
 
-  * If you are copying pieces of code from some other project, leave a note in the
-    comments, stating where you copied it from, who is the copyright owner, and
-    what license applies.
+  * If you are copying pieces of code from some other project, leave a note in
+    the comments, stating where you copied it from, who is the copyright owner,
+    and what license applies.
 
   * All the same rules apply to documentation that is stored in the repository.
 
 These simple rules should cover most of situation you are likely to encounter.
 In case of doubt, consult the [REUSE Practices][reuse] document.
 
+
+[issues]: https://github.com/union-platform/union-app/issues/new/choose
+[pr-template]: .github/pull_request_template.md#white_check_mark-checklist-for-your-pull-request
 [reuse]: https://reuse.software/spec/

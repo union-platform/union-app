@@ -8,7 +8,8 @@
 
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL%203.0-brightgreen.svg)](https://opensource.org/licenses/AGPL-3.0)
 
-Union is a platform where you can find your favorite matier, join a team, create something important or crazy; this is a place where you can be yourself.
+Union is a platform where you can find your favorite matier, join a team, create
+something important or crazy; this is a place where you can be yourself.
 
 ## Issue tracker [↑](#union)
 

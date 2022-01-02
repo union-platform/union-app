@@ -3,24 +3,23 @@
 # SPDX-License-Identifier: CC0-1.0
 
 name: union
-## Version is 0 by default to indicate that the package is not ready to be used
-## and has never been released/uploaded to Hackage.
-## When you think it's ready to be released,
-## set the version to something like 0.1.0.
-version: 0
+version: 0.1.0
 author: Union
 github: union-platform/union-app
 synopsis: This is backend server for Union platform.
 description: Please see the README on GitHub at <https://github.com/union-platform/union-app#readme>
 category: web
 copyright: 2021 Union
-license-file: ../LICENSE
+license: AGPL-3.0-or-later
+license-file: LICENSE
 
 extra-source-files:
   - README.md
-  - ../CHANGES.md
 
-# We enable all extensions that we consider harmless by default.
+verbatim:
+  cabal-version: 2.4
+
+# We enable all extensions that we consider harmless by default
 default-extensions:
   - AllowAmbiguousTypes
   - BangPatterns
@@ -41,6 +40,8 @@ default-extensions:
   - FlexibleInstances
   - GADTs
   - GeneralizedNewtypeDeriving
+  - ImportQualifiedPost
+  - InstanceSigs
   - LambdaCase
   - MultiParamTypeClasses
   - MultiWayIf
@@ -69,16 +70,50 @@ default-extensions:
   - ViewPatterns
 
 ghc-options:
+  # For details on warnings:
+  # https://downloads.haskell.org/~ghc/master/users-guide/using-warnings.html
+
+  # Warn on tabs (spaces are better)
+  - -fwarn-tabs
+  # Enable all warnings and disable the ones we don’t care about
   - -Weverything
+
+  # Turns off the more strict -Wmissing-signatures
+  # See https://ghc.haskell.org/trac/ghc/ticket/14794#ticket
   - -Wno-missing-exported-signatures
+  # Requires explicit imports of _every_ function (e.g. ‘$’); too strict
   - -Wno-missing-import-lists
+  # When GHC can’t specialize a polymorphic function. No big deal and requires
+  # fixing underlying libraries to solve
   - -Wno-missed-specialisations
+  # See missed-specialisations
   - -Wno-all-missed-specialisations
+  # Don’t use Safe Haskell warnings
   - -Wno-unsafe
+  # Don’t use Safe Haskell warnings
   - -Wno-safe
+  # Warning for polymorphic local bindings; nothing wrong with those
   - -Wno-missing-local-signatures
+  # Don’t warn if the monomorphism restriction is used
   - -Wno-monomorphism-restriction
+  # Allow one-line do blocks
+  - -Wno-unused-do-bind
+  # Do not warn if Prelude is imported implicitly
   - -Wno-implicit-prelude
+
+  # Warns when a pattern match might fail at runtime in a lambda or pattern binding
+  - -Wincomplete-uni-patterns
+  # Enables a warning when a record update could fail at runtime
+  - -Wincomplete-record-updates
+  # Will trigger when you create a record that could trigger the above warning
+  - -Wpartial-fields
+  # This warning will tell you when you’ve used toRational, toInteger, and
+  # realToFrac, but haven’t actually changed the type (e.g. Int32 to Int32)
+  - -Widentities
+  # This will warn you when one of your constraints is subsumed by another
+  - -Wredundant-constraints
+  # This warns you for a module declaration without declaring an explicit export list
+  - -Wmissing-export-lists
 
 when:
   - condition: impl(ghc >= 8.10.0)
@@ -89,32 +124,65 @@ when:
 
 dependencies:
   - name: base
-    mixin: [hiding (Prelude)]
-    version: "< 4.15"
-  - name: universum
-    mixin: [(Universum as Prelude), (Universum.Unsafe as Unsafe)]
+    version: ">=4.10 && < 5"
+  - relude
 
 library:
   source-dirs: src
   generated-other-modules:
     - Paths_union
+  dependencies:
+    - containers
+    - mtl
+    - optparse-applicative
+    - random
+    - safe-exceptions
+    - scientific
+    - time
+    - unliftio-core
+    - unordered-containers
+    - yaml
+
+    - ekg-core
+    - prometheus-client
+
+    - hasql
+    - hasql-pool
+    - rel8
+
+    - aeson
+    - aeson-casing
+    - http-api-data
+    - http-media
+    - jwt
+    - openapi3
+    - servant
+    - servant-server
+    - wai
+    - warp
 
 executables:
   union-server:
     main: Main.hs
     source-dirs: app
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - '"-with-rtsopts=-T -N"'
+    dependencies:
+      - union
+      - with-utf8
 
 tests:
   union-tests:
-    main: Main.hs
+    main: Spec.hs
     source-dirs: tests
-    build-tools: tasty-discover:tasty-discover
-
+    # build-tools: tasty-discover:tasty-discover
     ghc-options:
-      # Non-exhaustive patterns are ok and useful in tests.
+      # Non-exhaustive patterns are ok and useful in tests
       - -Wno-incomplete-patterns
-      # tasty runs tests in parallel,
-      # so using multiple threads should be useful.
+      - -Wno-incomplete-uni-patterns
+      # tasty runs tests in parallel, so using multiple threads should be useful
       - -threaded
       # should be harmless, but helps some people analyse something :shrug:
       - -eventlog
@@ -130,7 +198,11 @@ tests:
       # Weird quoting is required for cabal to correctly pass this
       # as _one_ option, otherwise it splits by spaces.
       - '"-with-rtsopts=-N -A64m -AL256m"'
-
     dependencies:
       - union
+
       - tasty
+      - hedgehog
+      - tasty-hedgehog
+
+      - jwt
