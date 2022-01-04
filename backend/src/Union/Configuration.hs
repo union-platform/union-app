@@ -29,6 +29,7 @@ import Options.Applicative
   short, strOption)
 
 import Core.Json (jsonCamelOptions)
+import Core.Logging (Severity(..))
 
 
 -- | Database configuration.
@@ -47,6 +48,7 @@ $(deriveJSON jsonCamelOptions 'DatabaseConfig)
 data UnionConfig = UnionConfig
   { ucAppPort  :: !Port
   , ucDatabase :: !DatabaseConfig
+  , ucSeverity :: !Severity
   } deriving stock (Generic, Eq, Show)
 $(deriveJSON jsonCamelOptions 'UnionConfig)
 
@@ -63,6 +65,7 @@ defaultUnionConfig = UnionConfig
     , dcTimeout = 5
     , dcCredentials = "host=localhost port=5432 user=union dbname=union"
     }
+  , ucSeverity = Info
   }
 
 -- | Options, passed via command line arguments.

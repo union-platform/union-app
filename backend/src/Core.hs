@@ -17,6 +17,8 @@ module Core
   , module Core.Jwt
     -- "Core.Jwt" provides convenient wrappers around JWT provided by the @jwt@
     -- library.
+  , module Core.Logging
+    -- "Core.Logging" provides logging functionality.
   , module Core.Measure
     -- "Core.Measure" contains useful type classes for dealing with the
     -- application metrics.
@@ -39,6 +41,7 @@ import Core.Error
 import Core.Has
 import Core.Json
 import Core.Jwt
+import Core.Logging
 import Core.Measure
 import Core.Monad
 import Core.Random
