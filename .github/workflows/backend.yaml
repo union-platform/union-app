@@ -1,0 +1,60 @@
+name: Haskell CI
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+jobs:
+  hlint:
+    name: HLint backend
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: "Set up HLint"
+        uses: rwe/actions-hlint-setup@v1
+        with:
+          version: "3.3.6"
+
+      - name: "Run HLint"
+        uses: rwe/actions-hlint-run@v2
+        with:
+          hlint-bin: hlint --hint=backend/.hlint.yaml
+          path: backend/src/
+          fail-on: warning
+
+  build:
+    name: Build and test backend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: haskell/actions/setup@v1.2.9
+        with:
+          ghc-version: "8.10.7"
+          enable-stack: true
+          stack-version: "latest"
+
+      - name: Cache
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-stack
+        with:
+          path: ~/.stack
+          key: ${{ runner.os }}-build-${{ env.cache-name }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: Build
+        run: stack build --pedantic
+
+      - name: Run tests
+        run: stack test

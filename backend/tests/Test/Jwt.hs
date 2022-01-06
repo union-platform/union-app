@@ -9,16 +9,16 @@ module Test.Jwt
 
 import Relude
 
-import qualified Hedgehog.Gen as Gen
-import qualified Hedgehog.Range as Range
 import qualified Web.JWT as Jwt
 
-import Hedgehog (Group (..), Gen, Property, forAll, property, tripping, (===))
+import Hedgehog (Gen, Group(..), Property, forAll, property, tripping, (===))
 
-import Core.Time (Seconds (..))
-import Core.Jwt (JwtPayload (..), MonadJwt (..), decodeIntIdPayload, decodeTextIdPayload, encodeIntIdPayload, encodeTextIdPayload)
+import Core.Jwt
+  (JwtPayload(..), MonadJwt(..), decodeIntIdPayload, decodeTextIdPayload,
+  encodeIntIdPayload, encodeTextIdPayload)
+import Core.Time (Seconds(..))
 
-import Test.Gen (genInt, genText, genSeconds)
+import Test.Gen (genInt, genSeconds, genText)
 import Test.Mock (runMockApp)
 
 

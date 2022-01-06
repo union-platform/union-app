@@ -16,7 +16,7 @@ import qualified Hedgehog.Range as Range
 
 import Hedgehog (Gen)
 
-import Core.Time (Seconds (..))
+import Core.Time (Seconds(..))
 
 
 genInt :: Gen Int

@@ -125,9 +125,8 @@ when:
       - -Wno-missing-safe-haskell-mode
 
 dependencies:
-  - name: base
-    version: ">=4.10 && < 5"
-  - relude
+  - base >=4.10 && < 5
+  - relude >= 1.0
 
 library:
   source-dirs: src
@@ -153,7 +152,7 @@ library:
 
     - hasql
     - hasql-pool
-    - rel8
+    # - rel8
 
     - aeson
     - aeson-casing

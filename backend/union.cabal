@@ -117,7 +117,7 @@ library
     , prometheus-client
     , random
     , rel8
-    , relude
+    , relude >=1.0
     , safe-exceptions
     , scientific
     , servant
@@ -190,7 +190,7 @@ executable union-server
   ghc-options: -fwarn-tabs -Weverything -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-unused-do-bind -Wno-implicit-prelude -Wincomplete-uni-patterns -Wincomplete-record-updates -Wpartial-fields -Widentities -Wredundant-constraints -Wmissing-export-lists -Wunused-packages -threaded -rtsopts "-with-rtsopts=-T -N"
   build-depends:
       base >=4.10 && <5
-    , relude
+    , relude >=1.0
     , union
     , with-utf8
   if impl(ghc >= 8.10.0)
@@ -260,7 +260,7 @@ test-suite union-tests
       base >=4.10 && <5
     , hedgehog
     , jwt
-    , relude
+    , relude >=1.0
     , tasty
     , tasty-hedgehog
     , union
