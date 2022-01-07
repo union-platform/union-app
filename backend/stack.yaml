@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-resolver: lts-18.19
+resolver: lts-18.21
 
 ghc-options:
   "$everything": -haddock
@@ -17,3 +17,4 @@ extra-deps:
   - hasql-migration-0.3.0
   - opaleye-0.8.0.1
   - rel8-1.2.1.0
+  - relude-1.0.0.1

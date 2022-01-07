@@ -46,9 +46,16 @@ packages:
       sha256: eb710f38cf571a7c965e2cde9e233b844b14f786d3cb191e2b77ff5c3c0ecf85
   original:
     hackage: rel8-1.2.1.0
+- completed:
+    hackage: relude-1.0.0.1@sha256:35bcdaf14018e79f11e712b0e2314c1aac79976f28f4adc179985457493557d5,11569
+    pantry-tree:
+      size: 4282
+      sha256: ead687d39d06c841de36fc214402ad4389e8837284485cfe52d975f51b274e81
+  original:
+    hackage: relude-1.0.0.1
 snapshots:
 - completed:
-    size: 586103
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/18/19.yaml
-    sha256: 32716534fff554b7f90762130fdb985cabf29f157758934dd1c8f3892a646430
-  original: lts-18.19
+    size: 586110
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/18/21.yaml
+    sha256: ce4fb8d44f3c6c6032060a02e0ebb1bd29937c9a70101c1517b92a87d9515160
+  original: lts-18.21

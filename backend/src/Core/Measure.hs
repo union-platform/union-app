@@ -129,7 +129,7 @@ timedActionPrometheusImpl nm = timedActionImplWith registerWithPrometheus nm
       Just hist -> observe hist reading
       Nothing   -> do
         newHist <- register $ histogram (Prometheus.Info nm label) defaultBuckets
-        () <$ atomicModifyIORef' promRef (\pHashMap ->
+        void $ atomicModifyIORef' promRef (\pHashMap ->
             (HashMap.insert label newHist pHashMap, ())
           )
         observe newHist reading
