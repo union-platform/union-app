@@ -114,6 +114,8 @@ ghc-options:
   - -Wredundant-constraints
   # This warns you for a module declaration without declaring an explicit export list
   - -Wmissing-export-lists
+  # Warns about unused packages
+  - -Wunused-packages
 
 when:
   - condition: impl(ghc >= 8.10.0)
@@ -134,13 +136,16 @@ library:
   dependencies:
     - containers
     - mtl
-    - optparse-applicative
-    - random
     - safe-exceptions
-    - scientific
-    - time
     - unliftio-core
     - unordered-containers
+
+    - co-log
+    - optparse-applicative
+    - random
+    - scientific
+    - text
+    - time
     - yaml
 
     - ekg-core
@@ -152,6 +157,7 @@ library:
 
     - aeson
     - aeson-casing
+    - aeson-pretty
     - http-api-data
     - http-media
     - jwt

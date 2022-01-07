@@ -21,6 +21,7 @@ import Data.Time.Clock (NominalDiffTime)
 
 import Core.Error (WithError, liftError)
 import Core.Has (Has, grab)
+import Core.Logging (logIO)
 
 
 -- | Constraint for monadic actions that wants access to database.
@@ -30,13 +31,18 @@ type WithDb env m = (MonadReader env m, Has DbPool env, MonadIO m)
 type DbPool = Pool.Pool
 
 -- | Create 'Pool.Pool'.
-createPool :: Int -> NominalDiffTime -> Text -> IO DbPool
-createPool size timeout credentials =
+createPool :: HasCallStack => Int -> NominalDiffTime -> Text -> IO DbPool
+createPool size timeout credentials = do
+  logIO "Creating DB pool..."
   Pool.acquire (size, timeout, encodeUtf8 credentials)
+{-# INLINE createPool #-}
 
 -- | Release 'Pool.Pool'.
-destroyPool :: DbPool -> IO ()
-destroyPool = Pool.release
+destroyPool :: HasCallStack => DbPool -> IO ()
+destroyPool p = do
+  logIO "Destroying DB pool..."
+  Pool.release p
+{-# INLINE destroyPool #-}
 
 -- | Helper to establish connection safely.
 withDb :: Int -> NominalDiffTime -> Text -> (DbPool -> IO a) -> IO a

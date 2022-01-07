@@ -32,6 +32,7 @@ library
       Core.Has
       Core.Json
       Core.Jwt
+      Core.Logging
       Core.Measure
       Core.Monad
       Core.Random
@@ -96,11 +97,13 @@ library
       UndecidableInstances
       UndecidableSuperClasses
       ViewPatterns
-  ghc-options: -fwarn-tabs -Weverything -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-unused-do-bind -Wno-implicit-prelude -Wincomplete-uni-patterns -Wincomplete-record-updates -Wpartial-fields -Widentities -Wredundant-constraints -Wmissing-export-lists
+  ghc-options: -fwarn-tabs -Weverything -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-unused-do-bind -Wno-implicit-prelude -Wincomplete-uni-patterns -Wincomplete-record-updates -Wpartial-fields -Widentities -Wredundant-constraints -Wmissing-export-lists -Wunused-packages
   build-depends:
       aeson
     , aeson-casing
+    , aeson-pretty
     , base >=4.10 && <5
+    , co-log
     , containers
     , ekg-core
     , hasql
@@ -119,6 +122,7 @@ library
     , scientific
     , servant
     , servant-server
+    , text
     , time
     , unliftio-core
     , unordered-containers
@@ -183,7 +187,7 @@ executable union-server
       UndecidableInstances
       UndecidableSuperClasses
       ViewPatterns
-  ghc-options: -fwarn-tabs -Weverything -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-unused-do-bind -Wno-implicit-prelude -Wincomplete-uni-patterns -Wincomplete-record-updates -Wpartial-fields -Widentities -Wredundant-constraints -Wmissing-export-lists -threaded -rtsopts "-with-rtsopts=-T -N"
+  ghc-options: -fwarn-tabs -Weverything -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-unused-do-bind -Wno-implicit-prelude -Wincomplete-uni-patterns -Wincomplete-record-updates -Wpartial-fields -Widentities -Wredundant-constraints -Wmissing-export-lists -Wunused-packages -threaded -rtsopts "-with-rtsopts=-T -N"
   build-depends:
       base >=4.10 && <5
     , relude
@@ -251,7 +255,7 @@ test-suite union-tests
       UndecidableInstances
       UndecidableSuperClasses
       ViewPatterns
-  ghc-options: -fwarn-tabs -Weverything -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-unused-do-bind -Wno-implicit-prelude -Wincomplete-uni-patterns -Wincomplete-record-updates -Wpartial-fields -Widentities -Wredundant-constraints -Wmissing-export-lists -Wno-incomplete-patterns -Wno-incomplete-uni-patterns -threaded -eventlog "-with-rtsopts=-N -A64m -AL256m"
+  ghc-options: -fwarn-tabs -Weverything -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-unused-do-bind -Wno-implicit-prelude -Wincomplete-uni-patterns -Wincomplete-record-updates -Wpartial-fields -Widentities -Wredundant-constraints -Wmissing-export-lists -Wunused-packages -Wno-incomplete-patterns -Wno-incomplete-uni-patterns -threaded -eventlog "-with-rtsopts=-N -A64m -AL256m"
   build-depends:
       base >=4.10 && <5
     , hedgehog

@@ -6,6 +6,7 @@ module Union.Application
   ( Union
   , UnionServer
 
+  , WithLog
   , WithDb
   , WithError
 
@@ -25,6 +26,8 @@ import qualified Core
 
 import Core.Db (DbPool)
 import Core.Has (Has, grab)
+import Core.Json (packJson)
+import Core.Logging (Log, LogAction, logDebug, logIO, logInfo)
 import Union.API (api)
 import Union.Configuration
   (DatabaseConfig(..), UnionConfig(..), UnionOptions(..), defaultUnionConfig,
@@ -37,6 +40,9 @@ type Union = Core.App ErrorType Env
 -- | Type alias to specify application server.
 type UnionServer = Core.AppServer Union
 
+-- | Constrain to actions with logging.
+type WithLog m = Core.WithLog Env Log m
+
 -- | Constrain to actions with DB access.
 type WithDb m = Core.WithDb Env m
 
@@ -47,8 +53,20 @@ type WithError m = Core.WithError ErrorType m
 data Env = Env
   { eConfig :: !UnionConfig
   , eDbPool :: !DbPool
+  , eLogger :: !(LogAction Union Log)
   } deriving (Has UnionConfig) via Core.Field "eConfig" Env
     deriving (Has DbPool)      via Core.Field "eDbPool" Env
+
+-- | Instance to specify how to get and update the 'LogAction' stored inside
+-- the 'Env'.
+instance Core.HasLog Env Log Union where
+  getLogAction :: Env -> LogAction Union Log
+  getLogAction = eLogger
+  {-# INLINE getLogAction #-}
+
+  setLogAction :: LogAction Union Log -> Env -> Env
+  setLogAction newLogAction env = env { eLogger = newLogAction }
+  {-# INLINE setLogAction #-}
 
 -- | Errors in Union.
 data ErrorType
@@ -72,19 +90,25 @@ data ErrorType
   deriving stock (Show, Eq)
 
 -- | Runs the web server which serves Union API.
-union :: Union ()
+union :: WithLog Union => Union ()
 union = do
+  logInfo "Starting application..."
   config <- grab @UnionConfig
+  logDebug $ "Configuration: \n" <> packJson config
   liftIO $ run (ucAppPort config) . serve api $ pure config
 
 -- | Create 'Env' and run 'Union' action with this environment.
-runUnion :: UnionOptions -> Union a -> IO a
+runUnion :: HasCallStack => UnionOptions -> Union a -> IO a
 runUnion options action = do
   config <- maybe (pure defaultUnionConfig) loadConfig $ uoConfig options
   let DatabaseConfig{..} = ucDatabase config
+  let logger = Core.setLogger $ ucSeverity config
+
   Core.withDb dcPoolSize dcTimeout dcCredentials $ \pool -> do
+    logIO "Preparing environment..."
     let env = Env
           { eConfig = config
           , eDbPool = pool
+          , eLogger = logger
           }
     liftIO $ Core.runApp env action
