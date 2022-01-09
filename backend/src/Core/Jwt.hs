@@ -7,12 +7,12 @@
 -- additional payload on user log in, for example, user id.
 module Core.Jwt
   ( -- * Secret
-    JwtSecret (..)
+    JwtSecret(..)
 
     -- * Token and payloads
     -- ** Data types
-  , JwtToken (..)
-  , JwtPayload (..)
+  , JwtToken(..)
+  , JwtPayload(..)
     -- ** Coders
   , encodeIntIdPayload
   , decodeIntIdPayload
@@ -24,7 +24,7 @@ module Core.Jwt
 
     -- * Jwt Effect
     -- ** Monad
-  , MonadJwt (..)
+  , MonadJwt(..)
     -- ** Internals of 'MonadJwt'
   , mkJwtTokenImpl
   , verifyJwtTokenImpl
@@ -50,15 +50,12 @@ import Core.Time (Seconds(..))
 -- @
 -- jwtSecret <- 'JwtSecret' \<$\> mkRandomString 10
 -- @
-newtype JwtSecret = JwtSecret
-  { unJwtSecret :: Text
-  }
+newtype JwtSecret = JwtSecret { unJwtSecret :: Text }
 
 -- | Encoded JSON web token.
-newtype JwtToken = JwtToken
-  { unJwtToken :: Text
-  } deriving stock (Show, Generic)
-    deriving newtype (Eq, Ord, Hashable, FromHttpApiData, FromJSON, ToJSON)
+newtype JwtToken = JwtToken { unJwtToken :: Text }
+  deriving newtype (Eq, Ord, Hashable, FromHttpApiData, FromJSON, ToJSON)
+  deriving stock (Show, Generic)
 
 -- | Stores arbitrary payload. If you want to store your custom payload, you
 -- need to specify two functions:
@@ -67,10 +64,9 @@ newtype JwtToken = JwtToken
 --
 -- See examples in this module: 'encodeIntIdPayload', 'decodeIntIdPayload',
 -- 'encodeTextIdPayload', 'decodeTextIdPayload'.
-newtype JwtPayload a = JwtPayload
-  { unJwtPayload :: a
-  } deriving stock (Show, Functor)
-    deriving newtype (Eq)
+newtype JwtPayload a = JwtPayload { unJwtPayload :: a }
+  deriving newtype (Eq)
+  deriving stock (Show, Functor)
 
 -- | Encodes 'JwtPayload' that stores 'Int' as payload with name @id@. Use it if
 -- you store ids as integer values. Dual to 'decodeIntIdPayload'.
@@ -81,9 +77,11 @@ encodeIntIdPayload = payloadToMap . Json.Number . fromIntegral . unJwtPayload
 -- | Decodes 'JwtPayload' from 'Jwt.ClaimsMap' that stores 'Int' under name
 -- @id@. Dual to 'encodeIntIdPayload'.
 decodeIntIdPayload :: Jwt.ClaimsMap -> Maybe (JwtPayload Int)
-decodeIntIdPayload = fmap JwtPayload . payloadFromMap (\case
-  Json.Number jwtId -> toBoundedInteger jwtId
-  _                 -> Nothing)
+decodeIntIdPayload = fmap JwtPayload . payloadFromMap
+  (\case
+    Json.Number jwtId -> toBoundedInteger jwtId
+    _                 -> Nothing
+  )
 {-# INLINE decodeIntIdPayload #-}
 
 -- | Encodes 'JwtPayload' that stores 'Text' as payload with name @id@. Use it if
@@ -95,9 +93,11 @@ encodeTextIdPayload = payloadToMap . Json.String . unJwtPayload
 -- | Decodes 'JwtPayload' from 'Jwt.ClaimsMap' that stores 'Int' under name
 -- @id@. Dual to 'encodeIntIdPayload'.
 decodeTextIdPayload :: Jwt.ClaimsMap -> Maybe (JwtPayload Text)
-decodeTextIdPayload = fmap JwtPayload . payloadFromMap (\case
-  Json.String jwtId -> Just jwtId
-  _                 -> Nothing)
+decodeTextIdPayload = fmap JwtPayload . payloadFromMap
+  (\case
+    Json.String jwtId -> Just jwtId
+    _                 -> Nothing
+  )
 {-# INLINE decodeTextIdPayload #-}
 
 -- | Creates 'Jwt.ClaimsMap' from 'Json.Value' under name @id@.
@@ -144,10 +144,11 @@ mkJwtTokenImpl encode (JwtSecret jwtSecret) expiry payload = do
   let secret = Jwt.hmacSecret jwtSecret
   timeNow <- liftIO getPOSIXTime
   let expiryTime = timeNow + fromIntegral (unSeconds expiry)
-  let claimsSet = mempty
-        { Jwt.exp = Jwt.numericDate expiryTime
-        , Jwt.unregisteredClaims = encode payload
-        }
+  let
+    claimsSet = mempty
+      { Jwt.exp                = Jwt.numericDate expiryTime
+      , Jwt.unregisteredClaims = encode payload
+      }
   pure $ JwtToken $ Jwt.encodeSigned secret mempty claimsSet
 
 -- | Default implementation of token validation.

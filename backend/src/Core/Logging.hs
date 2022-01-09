@@ -6,12 +6,13 @@
 
 -- | This module provides logging ability. Currently it only reexports @co-log@.
 module Core.Logging
-  ( module Colog
-
-  , Log
+  ( Log
   , logIO
   , setLogger
   , getSeverity
+
+    -- * Reexport
+  , module Colog
   ) where
 
 import Relude

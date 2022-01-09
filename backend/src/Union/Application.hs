@@ -5,14 +5,11 @@
 module Union.Application
   ( Union
   , UnionServer
-
   , WithLog
   , WithDb
   , WithError
-
   , Env
-  , ErrorType (..)
-
+  , ErrorType(..)
   , runUnion
   , union
   ) where
@@ -30,8 +27,12 @@ import Core.Json (packJson)
 import Core.Logging (Log, LogAction, logDebug, logIO, logInfo)
 import Union.API (api)
 import Union.Configuration
-  (DatabaseConfig(..), UnionConfig(..), UnionOptions(..), defaultUnionConfig,
-  loadConfig)
+  ( DatabaseConfig(..)
+  , UnionConfig(..)
+  , UnionOptions(..)
+  , defaultUnionConfig
+  , loadConfig
+  )
 
 
 -- | Main application monad.
@@ -54,8 +55,9 @@ data Env = Env
   { eConfig :: !UnionConfig
   , eDbPool :: !DbPool
   , eLogger :: !(LogAction Union Log)
-  } deriving (Has UnionConfig) via Core.Field "eConfig" Env
-    deriving (Has DbPool)      via Core.Field "eDbPool" Env
+  }
+  deriving (Has UnionConfig) via Core.Field "eConfig" Env
+  deriving (Has DbPool)      via Core.Field "eDbPool" Env
 
 -- | Instance to specify how to get and update the 'LogAction' stored inside
 -- the 'Env'.
@@ -101,14 +103,10 @@ union = do
 runUnion :: HasCallStack => UnionOptions -> Union a -> IO a
 runUnion options action = do
   config <- maybe (pure defaultUnionConfig) loadConfig $ uoConfig options
-  let DatabaseConfig{..} = ucDatabase config
-  let logger = Core.setLogger $ ucSeverity config
+  let DatabaseConfig {..} = ucDatabase config
+  let logger              = Core.setLogger $ ucSeverity config
 
   Core.withDb dcPoolSize dcTimeout dcCredentials $ \pool -> do
     logIO "Preparing environment..."
-    let env = Env
-          { eConfig = config
-          , eDbPool = pool
-          , eLogger = logger
-          }
+    let env = Env { eConfig = config, eDbPool = pool, eLogger = logger }
     liftIO $ Core.runApp env action

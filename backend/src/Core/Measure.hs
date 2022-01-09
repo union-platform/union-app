@@ -6,7 +6,7 @@
 -- apply some metric calculations on actions, e.g. taken time.
 module Core.Measure
   ( MonadMeasure
-  , MonadTimed (..)
+  , MonadTimed(..)
 
     -- * Environment types
   , Timings
@@ -25,8 +25,14 @@ import qualified System.Metrics as Metrics
 import qualified System.Metrics.Distribution as Distribution
 
 import Prometheus
-  (Histogram, Info(..), MonadMonitor, defaultBuckets, histogram, observe,
-  register)
+  ( Histogram
+  , Info(..)
+  , MonadMonitor
+  , defaultBuckets
+  , histogram
+  , observe
+  , register
+  )
 import Relude.Extra.CallStack (ownName)
 import System.CPUTime (getCPUTime)
 import System.Metrics.Distribution (Distribution)
@@ -65,13 +71,13 @@ type MonadMeasure m = (HasCallStack, MonadTimed m)
 --         otherMetrics label time
 -- @
 timedActionImplWith
-  :: forall r m a .
-    ( MonadReader r m
-    , Has Timings r
-    , Has Metrics.Store r
-    , MonadIO m
-    , HasCallStack
-    )
+  :: forall r m a
+   . ( MonadReader r m
+     , Has Timings r
+     , Has Metrics.Store r
+     , MonadIO m
+     , HasCallStack
+     )
   => (Text -> Double -> m ())
   -- ^ any given metrics collection actions.
   -> Text
@@ -80,9 +86,9 @@ timedActionImplWith
   -- ^ Action
   -> m a
 timedActionImplWith metricsAct _nm action = do
-  start <- liftIO getCPUTime
+  start   <- liftIO getCPUTime
   !result <- action
-  end <- liftIO getCPUTime
+  end     <- liftIO getCPUTime
   let !timeTaken = fromIntegral (end - start) * 1e-12
   dist <- getOrCreateDistribution $ toText ownName
   liftIO $ Distribution.add dist timeTaken
@@ -105,15 +111,15 @@ timedActionImplWith metricsAct _nm action = do
 -- in the @timings@ distribution with the label of the action.
 -- This is implementation has the integration with @prometheus@.
 timedActionPrometheusImpl
-  :: forall r m a .
-    ( MonadReader r m
-    , Has Timings r
-    , Has Metrics.Store r
-    , Has PrometheusRegistry r
-    , MonadIO m
-    , HasCallStack
-    , MonadMonitor m
-    )
+  :: forall r m a
+   . ( MonadReader r m
+     , Has Timings r
+     , Has Metrics.Store r
+     , Has PrometheusRegistry r
+     , MonadIO m
+     , HasCallStack
+     , MonadMonitor m
+     )
   => Text
   -- ^ Global name
   -> m a
@@ -121,15 +127,16 @@ timedActionPrometheusImpl
   -> m a
 timedActionPrometheusImpl nm = timedActionImplWith registerWithPrometheus nm
   where
-  registerWithPrometheus :: Text -> Double -> m ()
-  registerWithPrometheus label reading = do
-    promRef <- grab @PrometheusRegistry
-    promMap <- readIORef promRef
-    case HashMap.lookup label promMap of
-      Just hist -> observe hist reading
-      Nothing   -> do
-        newHist <- register $ histogram (Prometheus.Info nm label) defaultBuckets
-        void $ atomicModifyIORef' promRef (\pHashMap ->
-            (HashMap.insert label newHist pHashMap, ())
-          )
-        observe newHist reading
+    registerWithPrometheus :: Text -> Double -> m ()
+    registerWithPrometheus label reading = do
+      promRef <- grab @PrometheusRegistry
+      promMap <- readIORef promRef
+      case HashMap.lookup label promMap of
+        Just hist -> observe hist reading
+        Nothing   -> do
+          newHist <- register
+            $ histogram (Prometheus.Info nm label) defaultBuckets
+          void $ atomicModifyIORef'
+            promRef
+            (\pHashMap -> (HashMap.insert label newHist pHashMap, ()))
+          observe newHist reading

@@ -6,7 +6,7 @@
 -- | Helper functions and data types to work with time.
 module Core.Time
   ( -- * 'Seconds' related functions
-    Seconds (..)
+    Seconds(..)
   , dayInSeconds
   , threadDelay
 
@@ -25,10 +25,9 @@ import Data.Time.Clock (UTCTime(..))
 
 
 -- | Represents the amount of seconds.
-newtype Seconds = Seconds
-  { unSeconds :: Int
-  } deriving stock (Show)
-    deriving newtype (Eq)
+newtype Seconds = Seconds { unSeconds :: Int }
+  deriving newtype (Eq)
+  deriving stock (Show)
 
 -- | Similar to 'C.threadDelay' but receives 'Seconds' instead of 'Int'.
 threadDelay :: MonadIO m => Seconds -> m ()

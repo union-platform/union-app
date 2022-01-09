@@ -27,7 +27,7 @@ mkRandomString :: MonadIO m => Int -> m Text
 mkRandomString n = liftIO $ toText <$> replicateM n peekRandomChar
   where
     alphabet :: String
-    alphabet = ['A'..'Z'] ++ ['a'..'z'] ++ ['0'..'9']
+    alphabet = ['A' .. 'Z'] ++ ['a' .. 'z'] ++ ['0' .. '9']
 
     alphabetLength :: Int
     alphabetLength = length alphabet
