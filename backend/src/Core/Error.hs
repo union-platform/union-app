@@ -1,4 +1,4 @@
--- SPDX-FileCopyrightText: 2021 Union
+-- SPDX-FileCopyrightText: 2021-2022 Union
 --
 -- SPDX-License-Identifier: MPL-2.0
 
@@ -18,8 +18,10 @@ module Core.Error
   , toNoSourceException
 
     -- * Helper unctions
+  , toAppError
   , throwOnNothing
   , throwOnNothingM
+  , showErr
 
     -- * 'SourcePosition' helpers
   , SourcePosition(..)
@@ -27,11 +29,13 @@ module Core.Error
   ) where
 
 import Relude
+import Relude.Extra (firstF)
 
-import qualified Control.Monad.Except as E (catchError, throwError)
+import qualified Control.Monad.Except as E (catchError, liftEither, throwError)
 
 import Control.Monad.Except (MonadError)
 import GHC.Stack (SrcLoc(SrcLoc, srcLocModule, srcLocStartLine))
+import Text.Pretty.Simple (pShow)
 
 
 -- | Type alias for errors that has access to 'CallStack'.
@@ -96,6 +100,14 @@ toNoSourceException =
   AppException . ErrorWithSource (SourcePosition "<unknown loc>")
 {-# INLINE toNoSourceException #-}
 
+-- | Converts @err'@ to @err@.
+toAppError
+  :: WithError err m
+  => (err' -> err)
+  -> ExceptT (ErrorWithSource err') m a
+  -> m a
+toAppError f action = firstF (fmap f) (runExceptT action) >>= E.liftEither
+
 -- | Extract the value from a maybe, throwing the given @err@ if the value
 -- does not exist.
 throwOnNothing :: WithError err m => err -> Maybe a -> m a
@@ -108,3 +120,8 @@ throwOnNothingM :: WithError err m => err -> m (Maybe a) -> m a
 throwOnNothingM err action =
   withFrozenCallStack $ action >>= throwOnNothing err
 {-# INLINE throwOnNothingM #-}
+
+-- | Converts @err@ to 'Text' with pretty formatting.
+showErr :: Show err => err -> Text
+showErr = toStrict . pShow
+{-# INLINE showErr #-}
