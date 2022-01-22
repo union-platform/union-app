@@ -14,6 +14,8 @@ import Relude
 import qualified Data.Text as T
 
 import Control.Monad.Except (catchError)
+import Data.Time.Calendar (toGregorian)
+import Data.Time.Clock (utctDay)
 import Data.Time.Clock.POSIX (getCurrentTime, utcTimeToPOSIXSeconds)
 import Options.Applicative
   (Parser, command, help, hsubparser, info, metavar, progDesc, strArgument)
@@ -21,13 +23,11 @@ import System.Directory (doesFileExist)
 import System.FilePath ((</>))
 
 import Core.Db (getAppliedMigrations, pruneDb, runTransaction, showMigration)
-import Core.Error (showErr, toAppError)
+import Core.Error (showErr)
 import Core.Has (grab)
-import Core.Logging (logError)
-import Data.Time.Calendar (toGregorian)
-import Data.Time.Clock (utctDay)
-import Union.Application (ErrorType(DbError), runUnion)
-import Union.Configuration (UnionConfig(..), dcMigrations)
+import Union.App.Configuration (Config(..), dcMigrations)
+import Union.App.Db (runDb)
+import Union.App.Env (App, kill, runWithEnv)
 
 
 -- | Available migrations commands.
@@ -51,29 +51,38 @@ argName = strArgument $ mconcat
 
 -- | Migrations command interpreter.
 migrations :: Maybe FilePath -> MigrationsCommand -> IO ()
-migrations configPath cmd = runUnion configPath $ case cmd of
-  (Create name) -> do
-    UnionConfig { ucDatabase } <- grab @UnionConfig
-    now                        <- liftIO getCurrentTime
-    let
-      (year, _, _)         = toGregorian $ utctDay now
-      timestamp :: Integer = round $ utcTimeToPOSIXSeconds now * 1000
-      file =
-        dcMigrations ucDatabase </> show timestamp <> "-" <> name <> ".sql"
-    liftIO (doesFileExist file) >>= \case
-      False -> do
-        writeFile file $ licenseHeader year
-        putStrLn $ "Migration " <> file <> " was successfully created"
-      True -> putStrLn $ "Migration " <> file <> " already exists, skipping"
-  List -> do
-    mList <- toAppError DbError getAppliedMigrations
-      `catchError` \err -> logError (showErr err) >> fail "Check logs 🠑"
-    putTextLn "Following migrations applied to Union:"
-    mapM_ (putTextLn . showMigration) mList
-  Prune -> do
-    toAppError DbError (runTransaction pruneDb)
-      `catchError` \err -> logError (showErr err) >> fail "Check logs 🠑"
-    putTextLn "Now you schema is clean"
+migrations config cmd = runWithEnv config $ case cmd of
+  Create name -> createCommand name
+  List        -> listCommand
+  Prune       -> pruneCommand
+
+-- | Command to create new migration.
+createCommand :: FilePath -> App ()
+createCommand name = do
+  Config { cDatabase } <- grab @Config
+  now                  <- liftIO getCurrentTime
+  let
+    (year, _, _) = toGregorian $ utctDay now
+    timestamp :: Integer = round $ utcTimeToPOSIXSeconds now * 1000
+    file = dcMigrations cDatabase </> show timestamp <> "-" <> name <> ".sql"
+  liftIO (doesFileExist file) >>= \case
+    False -> do
+      writeFile file $ licenseHeader year
+      putStrLn $ "Migration " <> file <> " was successfully created"
+    True -> putStrLn $ "Migration " <> file <> " already exists, skipping"
+
+-- | Command to list applied migrations.
+listCommand :: App ()
+listCommand = do
+  mList <- runDb getAppliedMigrations `catchError` (kill . showErr)
+  putTextLn "Following migrations applied to Union:"
+  mapM_ (putTextLn . showMigration) mList
+
+-- | Command to prune database.
+pruneCommand :: App ()
+pruneCommand = do
+  runDb (runTransaction pruneDb) `catchError` (kill . showErr)
+  putTextLn "Now you schema is clean"
 
 -- | Returns license header for new migration files.
 -- Note, that here we replace '%' with ':' - we cannot use ':' directly because

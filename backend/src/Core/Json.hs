@@ -12,15 +12,15 @@ module Core.Json
 import Relude
 
 import Data.Aeson
-  (Options(..), SumEncoding(UntaggedValue), ToJSON, defaultOptions)
+  (Options(..), SumEncoding(UntaggedValue), ToJSON, defaultOptions, encode)
 import Data.Aeson.Casing (aesonPrefix, camelCase)
-import Data.Aeson.Encode.Pretty (encodePretty)
 import Data.Char (toLower)
+import Text.Pretty.Simple (pStringNoColor)
 
 
 -- | Converts data to 'Text'.
 packJson :: ToJSON a => a -> Text
-packJson = decodeUtf8 . encodePretty
+packJson = toStrict . pStringNoColor . decodeUtf8 . encode
 
 -- | Options for JSON types using train case.
 jsonCamelOptions :: Options

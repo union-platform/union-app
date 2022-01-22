@@ -38,13 +38,14 @@ library
       Core.Measure
       Core.Monad
       Core.Random
-      Core.Servant
       Core.Swagger
       Core.Time
       Union
       Union.API
-      Union.Application
-      Union.Configuration
+      Union.App.Configuration
+      Union.App.Db
+      Union.App.Env
+      Union.App.Error
   other-modules:
       Paths_union
   autogen-modules:
@@ -103,8 +104,8 @@ library
   build-depends:
       aeson
     , aeson-casing
-    , aeson-pretty
     , base >=4.10 && <5
+    , case-insensitive
     , co-log
     , containers
     , directory
@@ -116,13 +117,16 @@ library
     , hasql-transaction
     , http-api-data
     , http-media
+    , http-types
     , jwt
     , mtl
+    , network
     , openapi3
     , optparse-applicative
     , pretty-simple
     , prometheus-client
     , random
+    , rel8
     , relude >=1.0
     , safe-exceptions
     , scientific

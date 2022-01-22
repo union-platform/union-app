@@ -1,4 +1,4 @@
--- SPDX-FileCopyrightText: 2021 Union
+-- SPDX-FileCopyrightText: 2021-2022 Union
 --
 -- SPDX-License-Identifier: MPL-2.0
 
@@ -10,8 +10,8 @@ module Core
   , module Core.Error
     -- "Core.Error" contains types ans functions for the app error customization.
   , module Core.Has
-    -- "Core.Has" contains functions and type clases to work with the environment
-    -- data type.
+    -- "Core.Has" contains functions and type classes to work with the
+    --environment data type.
   , module Core.Json
     -- "Core.Json" provides tools to work with JSON.
   , module Core.Jwt
@@ -27,9 +27,6 @@ module Core
     -- should be build.
   , module Core.Random
     -- "Core.Random" contains functions to work with randomness.
-  , module Core.Servant
-    -- "Core.Servant" contains useful type alias to work with @servant@ and
-    -- generic servant approach.
   , module Core.Swagger
     -- "Core.Swagger" contains helper functions to create @swagger@ instances.
   , module Core.Time
@@ -45,6 +42,5 @@ import Core.Logging
 import Core.Measure
 import Core.Monad
 import Core.Random
-import Core.Servant
 import Core.Swagger
 import Core.Time

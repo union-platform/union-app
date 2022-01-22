@@ -19,13 +19,10 @@ module Core.Error
 
     -- * Helper unctions
   , toAppError
+  , toLogMsg
   , throwOnNothing
   , throwOnNothingM
   , showErr
-
-    -- * 'SourcePosition' helpers
-  , SourcePosition(..)
-  , toSourcePosition
   ) where
 
 import Relude
@@ -34,8 +31,10 @@ import Relude.Extra (firstF)
 import qualified Control.Monad.Except as E (catchError, liftEither, throwError)
 
 import Control.Monad.Except (MonadError)
-import GHC.Stack (SrcLoc(SrcLoc, srcLocModule, srcLocStartLine))
+import GHC.Stack.Types (CallStack(EmptyCallStack))
 import Text.Pretty.Simple (pShow)
+
+import Core.Logging (Msg(..), Severity)
 
 
 -- | Type alias for errors that has access to 'CallStack'.
@@ -43,48 +42,27 @@ type WithError err m = (MonadError (ErrorWithSource err) m, HasCallStack)
 
 -- | Wrapper around error type with attached source code position.
 data ErrorWithSource err = ErrorWithSource
-  { errorWithSourceCallStack :: !SourcePosition
-  , errorWithSourceType      :: !err
+  { ewsSourcePosition :: !CallStack
+  , ewsLogSeverity    :: !Severity
+  , ewsError          :: !err
   }
-  deriving stock (Show, Eq, Functor)
+  deriving stock (Show, Functor)
 
 -- | Specialized version of 'E.throwError' that attaches source code position of
 -- the place where this error was thrown.
-throwError :: WithError err m => err -> m a
-throwError = E.throwError . ErrorWithSource (toSourcePosition callStack)
+throwError :: WithError err m => Severity -> err -> m a
+throwError severity = E.throwError . ErrorWithSource callStack severity
 {-# INLINE throwError #-}
 
 -- | Specialized version of 'E.catchError'.
 catchError :: WithError err m => m a -> (err -> m a) -> m a
-catchError action handler =
-  action `E.catchError` (handler . errorWithSourceType)
+catchError action handler = action `E.catchError` (handler . ewsError)
 {-# INLINE catchError #-}
 
 -- | Lift errors from 'Either' by rethrowing them with attached source position.
-liftError :: WithError e m => Either e a -> m a
-liftError = either throwError pure
+liftError :: WithError e m => Severity -> Either e a -> m a
+liftError severity = either (throwError severity) pure
 {-# INLINE liftError #-}
-
--- | Formatted source code position. See 'toSourcePosition' for more details.
-newtype SourcePosition = SourcePosition { unSourcePosition :: Text }
-  deriving newtype (Show, Eq)
-
--- | Display 'CallStack' as 'SourcePosition' in the following format:
--- @
--- Module.function#line_number
--- @
-toSourcePosition :: CallStack -> SourcePosition
-toSourcePosition cs = SourcePosition showCallStack
-  where
-    showCallStack :: Text
-    showCallStack = case getCallStack cs of
-      [] -> "<unknown loc>"
-      [(name, loc)] -> showLoc name loc
-      (_, loc) : (callerName, _) : _ -> showLoc callerName loc
-
-    showLoc :: String -> SrcLoc -> Text
-    showLoc name SrcLoc {..} =
-      toText srcLocModule <> "." <> toText name <> "#" <> show srcLocStartLine
 
 -- | Exception wrapper around 'ErrorWithSource'. Useful when you need to
 -- throw/catch 'ErrorWithSource' as 'Exception'.
@@ -95,9 +73,9 @@ newtype AppException err = AppException
 
 -- | Helper to convert @err@ into something that can be thrown when you don't
 -- have the ability to specify the 'SourcePosition'.
-toNoSourceException :: err -> AppException err
-toNoSourceException =
-  AppException . ErrorWithSource (SourcePosition "<unknown loc>")
+toNoSourceException :: Severity -> err -> AppException err
+toNoSourceException severity =
+  AppException . ErrorWithSource EmptyCallStack severity
 {-# INLINE toNoSourceException #-}
 
 -- | Converts @err'@ to @err@.
@@ -108,17 +86,26 @@ toAppError
   -> m a
 toAppError f action = firstF (fmap f) (runExceptT action) >>= E.liftEither
 
+-- | Converts 'ErrorWithSource' to 'Msg' for logging purpose.
+toLogMsg :: Show err => ErrorWithSource err -> Msg Severity
+toLogMsg ErrorWithSource {..} = Msg
+  { msgSeverity = ewsLogSeverity
+  , msgStack    = ewsSourcePosition
+  , msgText     = showErr ewsError
+  }
+
 -- | Extract the value from a maybe, throwing the given @err@ if the value
 -- does not exist.
-throwOnNothing :: WithError err m => err -> Maybe a -> m a
-throwOnNothing err = withFrozenCallStack . maybe (throwError err) pure
+throwOnNothing :: WithError err m => Severity -> err -> Maybe a -> m a
+throwOnNothing severity err =
+  withFrozenCallStack . maybe (throwError severity err) pure
 {-# INLINE throwOnNothing #-}
 
 -- - | Extract the value from a 'Maybe' in @m@, throwing the given @err@ if
 -- the value does not exist.
-throwOnNothingM :: WithError err m => err -> m (Maybe a) -> m a
-throwOnNothingM err action =
-  withFrozenCallStack $ action >>= throwOnNothing err
+throwOnNothingM :: WithError err m => Severity -> err -> m (Maybe a) -> m a
+throwOnNothingM severity err action =
+  withFrozenCallStack $ action >>= throwOnNothing severity err
 {-# INLINE throwOnNothingM #-}
 
 -- | Converts @err@ to 'Text' with pretty formatting.

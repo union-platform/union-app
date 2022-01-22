@@ -15,19 +15,19 @@ module Core.Time
   , currentSecond
   , currentMinute
   , currentHour
+  , secondsInDiff
   ) where
 
 import Relude
 
 import qualified Control.Concurrent as C (threadDelay)
 
-import Data.Time.Clock (UTCTime(..))
+import Data.Time.Clock (UTCTime(..), diffUTCTime)
 
 
 -- | Represents the amount of seconds.
-newtype Seconds = Seconds { unSeconds :: Int }
-  deriving newtype (Eq)
-  deriving stock (Show)
+newtype Seconds = Seconds { getSeconds :: Int }
+  deriving newtype (Show, Eq)
 
 -- | Similar to 'C.threadDelay' but receives 'Seconds' instead of 'Int'.
 threadDelay :: MonadIO m => Seconds -> m ()
@@ -57,3 +57,9 @@ currentMinute (secondsElapsedInDay -> t) = (t `mod` 3600) `div` 60
 currentHour :: UTCTime -> Int
 currentHour (secondsElapsedInDay -> t) = t `div` 3600
 {-# INLINE currentHour #-}
+
+-- | Calculates a - b and returns diff in 'Seconds', milliseconds will be
+-- truncated.
+secondsInDiff :: UTCTime -> UTCTime -> Seconds
+secondsInDiff a b = Seconds . truncate $ diffUTCTime a b
+{-# INLINE secondsInDiff #-}

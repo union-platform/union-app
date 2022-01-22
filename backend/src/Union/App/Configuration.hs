@@ -2,14 +2,15 @@
 --
 -- SPDX-License-Identifier: AGPL-3.0-or-later
 
-module Union.Configuration
-  ( defaultUnionConfig
+-- | This module describes Union configuration.
+module Union.App.Configuration
+  ( defaultConfig
 
-  -- * Configuration types
+    -- * Configuration types
   , DatabaseConfig(..)
-  , UnionConfig(..)
+  , Config(..)
 
-  -- * Tools
+    -- * Tools
   , loadConfig
   ) where
 
@@ -41,27 +42,30 @@ data DatabaseConfig = DatabaseConfig
 $(deriveJSON jsonCamelOptions 'DatabaseConfig)
 
 -- | Union configuration.
-data UnionConfig = UnionConfig
-  { ucAppPort  :: !Port
-  , ucDatabase :: !DatabaseConfig
-  , ucSeverity :: !Severity
+data Config = Config
+  { cAppPort  :: !Port
+    -- ^ Application web port.
+  , cDatabase :: !DatabaseConfig
+    -- ^ Database configuration.
+  , cSeverity :: !Severity
+    -- ^ Logging severity.
   }
   deriving stock (Generic, Eq, Show)
-$(deriveJSON jsonCamelOptions 'UnionConfig)
+$(deriveJSON jsonCamelOptions 'Config)
 
 -- | Helper to load config from yaml file.
 loadConfig :: FromJSON settings => FilePath -> IO settings
 loadConfig path = loadYamlSettings [path] [] useEnv
 
 -- | Default Union config.
-defaultUnionConfig :: UnionConfig
-defaultUnionConfig = UnionConfig
-  { ucAppPort  = 8080
-  , ucDatabase = DatabaseConfig
+defaultConfig :: Config
+defaultConfig = Config
+  { cAppPort  = 8080
+  , cDatabase = DatabaseConfig
     { dcPoolSize    = 100
     , dcTimeout     = 5
     , dcCredentials = "host=localhost port=5432 user=union dbname=union"
     , dcMigrations  = "./migrations"
     }
-  , ucSeverity = Info
+  , cSeverity = Info
   }

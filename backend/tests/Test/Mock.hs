@@ -10,7 +10,9 @@ module Test.Mock
 
 import Relude
 
-import Core.Has (Has(..), grab)
+import qualified Core
+
+import Core.Has (Has)
 import Core.Jwt
   ( JwtSecret(..)
   , MonadJwt(..)
@@ -26,22 +28,20 @@ import Core.Monad (App, runApp)
 type MockApp = App () MockEnv
 
 -- | Environment for 'MockApp'.
-newtype MockEnv = MockEnv { mockEnvJwtSecret :: JwtSecret }
-
-instance Has JwtSecret MockEnv where
-  obtain = mockEnvJwtSecret
+newtype MockEnv = MockEnv { meJwtSecret :: JwtSecret }
+  deriving (Has JwtSecret) via Core.Field "meJwtSecret" MockEnv
 
 instance MonadJwt Int MockApp where
   mkJwtToken expiry payload = do
-    secret <- grab @JwtSecret
+    secret <- Core.grab @JwtSecret
     mkJwtTokenImpl encodeIntIdPayload secret expiry payload
 
   verifyJwtToken token = do
-    secret <- grab @JwtSecret
+    secret <- Core.grab @JwtSecret
     verifyJwtTokenImpl decodeIntIdPayload secret token
 
 mockEnv :: MockEnv
-mockEnv = MockEnv { mockEnvJwtSecret = JwtSecret "0123456789" }
+mockEnv = MockEnv { meJwtSecret = JwtSecret "0123456789" }
 
 runMockApp :: MockApp a -> IO a
 runMockApp = runApp mockEnv

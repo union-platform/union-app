@@ -19,13 +19,6 @@ packages:
   original:
     hackage: co-log-0.4.0.1
 - completed:
-    hackage: conferer-yaml-1.1.0.0@sha256:2e3fa4f8700f2d584e32dc588eceb946f29af296eb9e506d34eaef882e178253,2038
-    pantry-tree:
-      size: 376
-      sha256: cd3b0ac8a4c3067e7e4b528e80446fe9667332ee349bd97690ba059a14402bf7
-  original:
-    hackage: conferer-yaml-1.1.0.0
-- completed:
     hackage: hasql-migration-0.3.0@sha256:6ca4cc6c89834bb79eb9f15b504774043b5b3994336bd86a9d79e59da6d54963,2799
     pantry-tree:
       size: 589
@@ -33,19 +26,19 @@ packages:
   original:
     hackage: hasql-migration-0.3.0
 - completed:
-    hackage: opaleye-0.8.0.1@sha256:2c518a4fe8672600ea9c8b6fadbfbb708c8fef286f3bc8bc1cc530fc344c25b4,5801
+    hackage: opaleye-0.9.0.0@sha256:2e96ce59ea10f0b5f41cb4bccc67e0d18fef9dad6ebeef9cee33541564ac0be0,5837
     pantry-tree:
-      size: 5662
-      sha256: 23a1314294103065989ebaa7717af2aa3f1595c7fff23c8eea7c1836ddce5a04
+      size: 5661
+      sha256: 0cd508ef304e75b8a492b214a8865c9b305a7f38a034d8704f5b26b61a9e9fd8
   original:
-    hackage: opaleye-0.8.0.1
+    hackage: opaleye-0.9.0.0
 - completed:
-    hackage: rel8-1.2.1.0@sha256:d7c22b8991e8f2e2647e73b154f72943f42c4e2c804a1af9fff31693de2d5958,5045
+    hackage: rel8-1.3.0.0@sha256:f9f5f74b7a0d68f1dfc31ddf482d4ebfc6cac638dfe30bea07378cb384cbf52c,5114
     pantry-tree:
-      size: 9027
-      sha256: eb710f38cf571a7c965e2cde9e233b844b14f786d3cb191e2b77ff5c3c0ecf85
+      size: 9161
+      sha256: 2b151572fb50e63b4e47a2aaaf2a9431aa7719f8cf334babdf53134df77befeb
   original:
-    hackage: rel8-1.2.1.0
+    hackage: rel8-1.3.0.0
 - completed:
     hackage: relude-1.0.0.1@sha256:35bcdaf14018e79f11e712b0e2314c1aac79976f28f4adc179985457493557d5,11569
     pantry-tree:
@@ -55,7 +48,7 @@ packages:
     hackage: relude-1.0.0.1
 snapshots:
 - completed:
-    size: 586110
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/18/21.yaml
-    sha256: ce4fb8d44f3c6c6032060a02e0ebb1bd29937c9a70101c1517b92a87d9515160
-  original: lts-18.21
+    size: 590100
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/18/28.yaml
+    sha256: 428ec8d5ce932190d3cbe266b9eb3c175cd81e984babf876b64019e2cbe4ea68
+  original: lts-18.28

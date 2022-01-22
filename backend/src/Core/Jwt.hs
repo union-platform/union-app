@@ -143,7 +143,7 @@ mkJwtTokenImpl
 mkJwtTokenImpl encode (JwtSecret jwtSecret) expiry payload = do
   let secret = Jwt.hmacSecret jwtSecret
   timeNow <- liftIO getPOSIXTime
-  let expiryTime = timeNow + fromIntegral (unSeconds expiry)
+  let expiryTime = timeNow + fromIntegral (getSeconds expiry)
   let
     claimsSet = mempty
       { Jwt.exp                = Jwt.numericDate expiryTime

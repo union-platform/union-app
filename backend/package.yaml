@@ -133,43 +133,50 @@ library:
   generated-other-modules:
     - Paths_union
   dependencies:
+    # haskell staff
     - containers
     - directory
     - filepath
     - mtl
-    - safe-exceptions
-    - unliftio-core
-    - unordered-containers
-
-    - co-log
-    - optparse-applicative
-    - pretty-simple
     - random
+    - safe-exceptions
     - scientific
     - text
     - time
-    - yaml
+    - unliftio-core
+    - unordered-containers
 
+    # monitoring
     - ekg-core
     - prometheus-client
 
-    # - rel8
+    # database
     - hasql
     - hasql-migration
     - hasql-pool
     - hasql-transaction
+    - rel8
 
+    # http
     - aeson
     - aeson-casing
-    - aeson-pretty
     - http-api-data
     - http-media
+    - http-types
     - jwt
+    - network
     - openapi3
     - servant
     - servant-server
     - wai
     - warp
+
+    # other
+    - case-insensitive
+    - co-log
+    - optparse-applicative
+    - pretty-simple
+    - yaml
 
 executables:
   union-server:
