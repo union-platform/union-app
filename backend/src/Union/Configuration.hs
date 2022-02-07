@@ -6,14 +6,14 @@ module Union.Configuration
   ( defaultUnionConfig
 
   -- * Configuration types
-  , DatabaseConfig (..)
-  , UnionConfig (..)
+  , DatabaseConfig(..)
+  , UnionConfig(..)
 
   -- * Tools
   , loadConfig
 
   -- * Command-line options
-  , UnionOptions (..)
+  , UnionOptions(..)
   , unionOpts
   ) where
 
@@ -25,8 +25,18 @@ import Data.Time.Clock (NominalDiffTime)
 import Data.Yaml.Config (loadYamlSettings, useEnv)
 import Network.Wai.Handler.Warp (Port)
 import Options.Applicative
-  (Parser, execParser, fullDesc, help, helper, info, long, metavar, progDesc,
-  short, strOption)
+  ( Parser
+  , execParser
+  , fullDesc
+  , help
+  , helper
+  , info
+  , long
+  , metavar
+  , progDesc
+  , short
+  , strOption
+  )
 
 import Core.Json (jsonCamelOptions)
 import Core.Logging (Severity(..))
@@ -41,7 +51,8 @@ data DatabaseConfig = DatabaseConfig
     -- The smallest acceptable value is 0.5 seconds.
   , dcCredentials :: !Text
     -- ^ Connection settings.
-  } deriving stock (Generic, Eq, Show)
+  }
+  deriving stock (Generic, Eq, Show)
 $(deriveJSON jsonCamelOptions 'DatabaseConfig)
 
 -- | Union configuration.
@@ -49,7 +60,8 @@ data UnionConfig = UnionConfig
   { ucAppPort  :: !Port
   , ucDatabase :: !DatabaseConfig
   , ucSeverity :: !Severity
-  } deriving stock (Generic, Eq, Show)
+  }
+  deriving stock (Generic, Eq, Show)
 $(deriveJSON jsonCamelOptions 'UnionConfig)
 
 -- | Helper to load config from yaml file.
@@ -59,31 +71,32 @@ loadConfig path = loadYamlSettings [path] [] useEnv
 -- | Default Union config.
 defaultUnionConfig :: UnionConfig
 defaultUnionConfig = UnionConfig
-  { ucAppPort = 8080
+  { ucAppPort  = 8080
   , ucDatabase = DatabaseConfig
-    { dcPoolSize = 100
-    , dcTimeout = 5
+    { dcPoolSize    = 100
+    , dcTimeout     = 5
     , dcCredentials = "host=localhost port=5432 user=union dbname=union"
     }
   , ucSeverity = Info
   }
 
 -- | Options, passed via command line arguments.
-newtype UnionOptions = UnionOptions
-  { uoConfig  :: Maybe FilePath
-  } deriving stock (Generic, Eq, Show)
+newtype UnionOptions = UnionOptions { uoConfig  :: Maybe FilePath }
+  deriving stock (Generic, Eq, Show)
 
 unionOpts :: IO UnionOptions
-unionOpts = execParser . info (unionOptsParser <**> helper) $
-  fullDesc <> progDesc "Union web API"
+unionOpts =
+  execParser . info (unionOptsParser <**> helper) $ fullDesc <> progDesc
+    "Union web API"
 
 unionOptsParser :: Parser UnionOptions
-unionOptsParser = UnionOptions
-  <$> configParser
+unionOptsParser = UnionOptions <$> configParser
 
 configParser :: Parser (Maybe FilePath)
-configParser = optional . strOption $
-  short 'c' <>
-  long "config" <>
-  metavar "UNION_CONFIG" <>
-  help "Path to configuration file."
+configParser =
+  optional
+    .  strOption
+    $  short 'c'
+    <> long "config"
+    <> metavar "UNION_CONFIG"
+    <> help "Path to configuration file."

@@ -12,8 +12,13 @@ import Relude
 
 import Core.Has (Has(..), grab)
 import Core.Jwt
-  (JwtSecret(..), MonadJwt(..), decodeIntIdPayload, encodeIntIdPayload,
-  mkJwtTokenImpl, verifyJwtTokenImpl)
+  ( JwtSecret(..)
+  , MonadJwt(..)
+  , decodeIntIdPayload
+  , encodeIntIdPayload
+  , mkJwtTokenImpl
+  , verifyJwtTokenImpl
+  )
 import Core.Monad (App, runApp)
 
 
@@ -21,9 +26,7 @@ import Core.Monad (App, runApp)
 type MockApp = App () MockEnv
 
 -- | Environment for 'MockApp'.
-newtype MockEnv = MockEnv
-  { mockEnvJwtSecret :: JwtSecret
-  }
+newtype MockEnv = MockEnv { mockEnvJwtSecret :: JwtSecret }
 
 instance Has JwtSecret MockEnv where
   obtain = mockEnvJwtSecret
@@ -38,9 +41,7 @@ instance MonadJwt Int MockApp where
     verifyJwtTokenImpl decodeIntIdPayload secret token
 
 mockEnv :: MockEnv
-mockEnv = MockEnv
-  { mockEnvJwtSecret = JwtSecret "0123456789"
-  }
+mockEnv = MockEnv { mockEnvJwtSecret = JwtSecret "0123456789" }
 
 runMockApp :: MockApp a -> IO a
 runMockApp = runApp mockEnv

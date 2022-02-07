@@ -116,7 +116,6 @@ library
     , optparse-applicative
     , prometheus-client
     , random
-    , rel8
     , relude >=1.0
     , safe-exceptions
     , scientific

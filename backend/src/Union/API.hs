@@ -9,7 +9,7 @@ module Union.API
 
 import Relude
 
-import Servant (Get, JSON, type (:>))
+import Servant (type (:>), Get, JSON)
 
 import Union.Configuration (UnionConfig)
 

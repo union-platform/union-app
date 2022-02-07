@@ -1,0 +1,79 @@
+# SPDX-FileCopyrightText: 2022 Union
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+conf_layout:
+  lconfig_cols: 80
+  lconfig_indentAmount: 2
+  lconfig_indentPolicy: IndentPolicyLeft
+  # lconfig_importColumn: 50
+  # lconfig_importAsColumn: 50
+
+  lconfig_alignmentLimit: 30
+  lconfig_alignmentBreakOnMultiline: true
+
+  lconfig_altChooser:
+    tag: AltChooserBoundedSearch
+    contents: 3
+
+  lconfig_columnAlignMode:
+    tag: ColumnAlignModeMajority
+    contents: 0.7
+
+  lconfig_indentWhereSpecial: false
+  lconfig_indentListSpecial: true
+  lconfig_hangingTypeSignature: false
+  lconfig_reformatModulePreamble: true
+  lconfig_allowSingleLineExportList: false
+  lconfig_allowHangingQuasiQuotes: true
+  lconfig_experimentalSemicolonNewlines: true
+
+conf_forward:
+  options_ghc:
+    - -XAllowAmbiguousTypes
+    - -XBangPatterns
+    - -XBlockArguments
+    - -XConstraintKinds
+    - -XDataKinds
+    - -XDefaultSignatures
+    - -XDeriveAnyClass
+    - -XDeriveDataTypeable
+    - -XDeriveFoldable
+    - -XDeriveFunctor
+    - -XDeriveGeneric
+    - -XDeriveTraversable
+    - -XDerivingStrategies
+    - -XDerivingVia
+    - -XEmptyCase
+    - -XFlexibleContexts
+    - -XFlexibleInstances
+    - -XGADTs
+    - -XGeneralizedNewtypeDeriving
+    - -XImportQualifiedPost
+    - -XInstanceSigs
+    - -XLambdaCase
+    - -XMultiParamTypeClasses
+    - -XMultiWayIf
+    - -XNamedFieldPuns
+    - -XNegativeLiterals
+    - -XNoImplicitPrelude
+    - -XNumDecimals
+    - -XOverloadedLabels
+    - -XOverloadedStrings
+    - -XPatternSynonyms
+    - -XPolyKinds
+    - -XQuasiQuotes
+    - -XRankNTypes
+    - -XRecordWildCards
+    - -XRecursiveDo
+    - -XScopedTypeVariables
+    - -XStandaloneDeriving
+    - -XStrictData
+    - -XTemplateHaskell
+    - -XTupleSections
+    - -XTypeApplications
+    - -XTypeFamilies
+    - -XTypeOperators
+    - -XUndecidableInstances
+    - -XUndecidableSuperClasses
+    - -XViewPatterns

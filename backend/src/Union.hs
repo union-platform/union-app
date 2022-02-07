@@ -5,11 +5,11 @@
 -- | The main module that reexports all main functionality.
 module Union
   ( module Union.API
-  -- "Union.API" defines Union API.
+    -- "Union.API" defines Union API.
   , module Union.Application
-  -- "Union.Application" defines Union application.
+    -- "Union.Application" defines Union application.
   , module Union.Configuration
-  -- "Union.Configuration" defines Union configuration.
+    -- "Union.Configuration" defines Union configuration.
   ) where
 
 import Union.API
