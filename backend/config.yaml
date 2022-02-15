@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 Union
+# SPDX-FileCopyrightText: 2021-2022 Union
 #
 # SPDX-License-Identifier: CC0-1.0
 
@@ -7,4 +7,5 @@ database:
   poolSize: 100
   timeout: 5
   credentials: "host=localhost port=5432 user=union dbname=union"
+  migrations: "./migrations"
 severity: debug
