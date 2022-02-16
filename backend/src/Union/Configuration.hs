@@ -1,4 +1,4 @@
--- SPDX-FileCopyrightText: 2021 Union
+-- SPDX-FileCopyrightText: 2021-2022 Union
 --
 -- SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -11,10 +11,6 @@ module Union.Configuration
 
   -- * Tools
   , loadConfig
-
-  -- * Command-line options
-  , UnionOptions(..)
-  , unionOpts
   ) where
 
 import Relude
@@ -24,19 +20,6 @@ import Data.Aeson.TH (deriveJSON)
 import Data.Time.Clock (NominalDiffTime)
 import Data.Yaml.Config (loadYamlSettings, useEnv)
 import Network.Wai.Handler.Warp (Port)
-import Options.Applicative
-  ( Parser
-  , execParser
-  , fullDesc
-  , help
-  , helper
-  , info
-  , long
-  , metavar
-  , progDesc
-  , short
-  , strOption
-  )
 
 import Core.Json (jsonCamelOptions)
 import Core.Logging (Severity(..))
@@ -51,6 +34,8 @@ data DatabaseConfig = DatabaseConfig
     -- The smallest acceptable value is 0.5 seconds.
   , dcCredentials :: !Text
     -- ^ Connection settings.
+  , dcMigrations  :: !FilePath
+    -- ^ Path to migrations folder.
   }
   deriving stock (Generic, Eq, Show)
 $(deriveJSON jsonCamelOptions 'DatabaseConfig)
@@ -76,27 +61,7 @@ defaultUnionConfig = UnionConfig
     { dcPoolSize    = 100
     , dcTimeout     = 5
     , dcCredentials = "host=localhost port=5432 user=union dbname=union"
+    , dcMigrations  = "./migrations"
     }
   , ucSeverity = Info
   }
-
--- | Options, passed via command line arguments.
-newtype UnionOptions = UnionOptions { uoConfig  :: Maybe FilePath }
-  deriving stock (Generic, Eq, Show)
-
-unionOpts :: IO UnionOptions
-unionOpts =
-  execParser . info (unionOptsParser <**> helper) $ fullDesc <> progDesc
-    "Union web API"
-
-unionOptsParser :: Parser UnionOptions
-unionOptsParser = UnionOptions <$> configParser
-
-configParser :: Parser (Maybe FilePath)
-configParser =
-  optional
-    .  strOption
-    $  short 'c'
-    <> long "config"
-    <> metavar "UNION_CONFIG"
-    <> help "Path to configuration file."

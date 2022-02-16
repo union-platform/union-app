@@ -1,4 +1,4 @@
--- SPDX-FileCopyrightText: 2021 Union
+-- SPDX-FileCopyrightText: 2021-2022 Union
 --
 -- SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -10,10 +10,14 @@ import Relude
 
 import Main.Utf8 (withUtf8)
 
-import Union (runUnion, union, unionOpts)
+import Command (Arguments(..), Command(..), getArguments)
+import Command.Migrations (migrations)
+import Union (runUnion, union)
 
 
 main :: IO ()
 main = withUtf8 $ do
-  opts <- unionOpts
-  runUnion opts union
+  Arguments {..} <- getArguments
+  case oCommand of
+    Run            -> runUnion oConfig union
+    Migrations cmd -> migrations oConfig cmd
