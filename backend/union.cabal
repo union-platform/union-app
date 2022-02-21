@@ -26,6 +26,8 @@ source-repository head
 
 library
   exposed-modules:
+      Command
+      Command.Migrations
       Core
       Core.Db
       Core.Error
@@ -105,18 +107,22 @@ library
     , base >=4.10 && <5
     , co-log
     , containers
+    , directory
     , ekg-core
+    , filepath
     , hasql
+    , hasql-migration
     , hasql-pool
+    , hasql-transaction
     , http-api-data
     , http-media
     , jwt
     , mtl
     , openapi3
     , optparse-applicative
+    , pretty-simple
     , prometheus-client
     , random
-    , rel8
     , relude >=1.0
     , safe-exceptions
     , scientific

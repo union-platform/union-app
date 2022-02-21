@@ -1,37 +1,40 @@
--- SPDX-FileCopyrightText: 2021 Union
+-- SPDX-FileCopyrightText: 2021-2022 Union
 --
 -- SPDX-License-Identifier: AGPL-3.0-or-later
 
 module Union.Application
   ( Union
   , UnionServer
-
   , WithLog
   , WithDb
   , WithError
-
   , Env
-  , ErrorType (..)
-
+  , ErrorType(..)
   , runUnion
   , union
   ) where
 
 import Relude
 
+import Hasql.Migration (MigrationError)
+import Hasql.Pool (UsageError)
 import Network.Wai.Handler.Warp (run)
 import Servant (serve)
 
 import qualified Core
 
-import Core.Db (DbPool)
+import Core.Db (DbPool, migrate)
+import Core.Error (catchError, toAppError, showErr)
 import Core.Has (Has, grab)
 import Core.Json (packJson)
-import Core.Logging (Log, LogAction, logDebug, logIO, logInfo)
+import Core.Logging (Log, LogAction, logDebug, logError, logInfo)
 import Union.API (api)
 import Union.Configuration
-  (DatabaseConfig(..), UnionConfig(..), UnionOptions(..), defaultUnionConfig,
-  loadConfig)
+  ( DatabaseConfig(..)
+  , UnionConfig(..)
+  , defaultUnionConfig
+  , loadConfig
+  )
 
 
 -- | Main application monad.
@@ -54,8 +57,9 @@ data Env = Env
   { eConfig :: !UnionConfig
   , eDbPool :: !DbPool
   , eLogger :: !(LogAction Union Log)
-  } deriving (Has UnionConfig) via Core.Field "eConfig" Env
-    deriving (Has DbPool)      via Core.Field "eDbPool" Env
+  }
+  deriving (Has UnionConfig) via Core.Field "eConfig" Env
+  deriving (Has DbPool)      via Core.Field "eDbPool" Env
 
 -- | Instance to specify how to get and update the 'LogAction' stored inside
 -- the 'Env'.
@@ -85,30 +89,37 @@ data ErrorType
   | HeaderDecodeError Text
   -- ^ An authentication header that was required was provided but not in a
   -- format that the server can understand.
-  | DbError Text
-  -- ^ Data base specific errors.
+  | DbError UsageError
+  -- ^ Database specific errors.
   deriving stock (Show, Eq)
 
 -- | Runs the web server which serves Union API.
 union :: WithLog Union => Union ()
 union = do
-  logInfo "Starting application..."
   config <- grab @UnionConfig
   logDebug $ "Configuration: \n" <> packJson config
+  logInfo "Running migrations..."
+  whenJustM (initDb config) $ \err ->
+    logError ("Cannot apply migration: " <> showErr err) >> fail "Check logs 🠑"
+  logInfo "Starting application..."
   liftIO $ run (ucAppPort config) . serve api $ pure config
 
+-- | Init DB with migrations.
+initDb
+  :: (MonadIO m, MonadFail m, WithLog m, WithError m)
+  => UnionConfig
+  -> m (Maybe MigrationError)
+initDb config =
+  toAppError DbError (migrate (dcMigrations . ucDatabase $ config))
+    `catchError` \err -> logError (showErr err) >> fail "Check logs 🠑"
+
 -- | Create 'Env' and run 'Union' action with this environment.
-runUnion :: HasCallStack => UnionOptions -> Union a -> IO a
-runUnion options action = do
-  config <- maybe (pure defaultUnionConfig) loadConfig $ uoConfig options
-  let DatabaseConfig{..} = ucDatabase config
-  let logger = Core.setLogger $ ucSeverity config
+runUnion :: Maybe FilePath -> Union a -> IO a
+runUnion configPath action = do
+  config <- maybe (pure defaultUnionConfig) loadConfig configPath
+  let DatabaseConfig {..} = ucDatabase config
+  let logger              = Core.setLogger $ ucSeverity config
 
   Core.withDb dcPoolSize dcTimeout dcCredentials $ \pool -> do
-    logIO "Preparing environment..."
-    let env = Env
-          { eConfig = config
-          , eDbPool = pool
-          , eLogger = logger
-          }
+    let env = Env { eConfig = config, eDbPool = pool, eLogger = logger }
     liftIO $ Core.runApp env action

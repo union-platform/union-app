@@ -11,11 +11,16 @@ import Relude
 
 import qualified Web.JWT as Jwt
 
-import Hedgehog (Gen, Group(..), Property, forAll, property, tripping, (===))
+import Hedgehog ((===), Gen, Group(..), Property, forAll, property, tripping)
 
 import Core.Jwt
-  (JwtPayload(..), MonadJwt(..), decodeIntIdPayload, decodeTextIdPayload,
-  encodeIntIdPayload, encodeTextIdPayload)
+  ( JwtPayload(..)
+  , MonadJwt(..)
+  , decodeIntIdPayload
+  , decodeTextIdPayload
+  , encodeIntIdPayload
+  , encodeTextIdPayload
+  )
 import Core.Time (Seconds(..))
 
 import Test.Gen (genInt, genSeconds, genText)
@@ -23,11 +28,12 @@ import Test.Mock (runMockApp)
 
 
 jwtTests :: Group
-jwtTests = Group "JWT roundtrip properties"
-  [ "fromJwtMap . toJwtMap @Int  ≡ Just" `named`
-      jwtRoundtrip genInt encodeIntIdPayload decodeIntIdPayload
-  , "fromJwtMap . toJwtMap @Text ≡ Just" `named`
-      jwtRoundtrip genText encodeTextIdPayload decodeTextIdPayload
+jwtTests = Group
+  "JWT roundtrip properties"
+  [ "fromJwtMap . toJwtMap @Int  ≡ Just"
+    `named` jwtRoundtrip genInt encodeIntIdPayload decodeIntIdPayload
+  , "fromJwtMap . toJwtMap @Text ≡ Just"
+    `named` jwtRoundtrip genText encodeTextIdPayload decodeTextIdPayload
   , "verifyJwt  . createJwt      ≡ True" `named` createAndVerifyJwt
   ]
   where
@@ -35,32 +41,29 @@ jwtTests = Group "JWT roundtrip properties"
     named = (,)
 
 jwtRoundtrip
-    :: (Eq a, Show a)
-    => Gen a
+  :: (Eq a, Show a)
+  => Gen a
     -- ^ Payload generator
-    -> (JwtPayload a -> Jwt.ClaimsMap)
+  -> (JwtPayload a -> Jwt.ClaimsMap)
     -- ^ Encoder
-    -> (Jwt.ClaimsMap -> Maybe (JwtPayload a))
+  -> (Jwt.ClaimsMap -> Maybe (JwtPayload a))
     -- ^ Decoder
-    -> Property
+  -> Property
 jwtRoundtrip gen encode decode = property $ do
-    randomPayload <- JwtPayload <$> forAll gen
-    tripping randomPayload encode decode
+  randomPayload <- JwtPayload <$> forAll gen
+  tripping randomPayload encode decode
 
 createAndVerifyJwt :: Property
 createAndVerifyJwt = property $ do
-    seconds <- forAll genSeconds
-    payload <- forAll genPayload
-    verifiedPayload <- liftIO $ runMockApp $ makeAndVerifyToken seconds payload
-    verifiedPayload === Just payload
+  seconds         <- forAll genSeconds
+  payload         <- forAll genPayload
+  verifiedPayload <- liftIO $ runMockApp $ makeAndVerifyToken seconds payload
+  verifiedPayload === Just payload
 
 
 genPayload :: Gen (JwtPayload Int)
 genPayload = JwtPayload <$> genInt
 
 makeAndVerifyToken
-    :: MonadJwt Int m
-    => Seconds
-    -> JwtPayload Int
-    -> m (Maybe (JwtPayload Int))
+  :: MonadJwt Int m => Seconds -> JwtPayload Int -> m (Maybe (JwtPayload Int))
 makeAndVerifyToken expiry = mkJwtToken expiry >=> verifyJwtToken

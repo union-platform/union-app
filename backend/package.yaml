@@ -1,6 +1,6 @@
-# SPDX-FileCopyrightText: 2021 Union
+# SPDX-FileCopyrightText: 2021-2022 Union
 #
-# SPDX-License-Identifier: CC0-1.0
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 name: union
 version: 0.1.0
@@ -134,6 +134,8 @@ library:
     - Paths_union
   dependencies:
     - containers
+    - directory
+    - filepath
     - mtl
     - safe-exceptions
     - unliftio-core
@@ -141,6 +143,7 @@ library:
 
     - co-log
     - optparse-applicative
+    - pretty-simple
     - random
     - scientific
     - text
@@ -150,9 +153,11 @@ library:
     - ekg-core
     - prometheus-client
 
-    - hasql
-    - hasql-pool
     # - rel8
+    - hasql
+    - hasql-migration
+    - hasql-pool
+    - hasql-transaction
 
     - aeson
     - aeson-casing

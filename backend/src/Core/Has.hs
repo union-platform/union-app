@@ -4,11 +4,11 @@
 
 -- | This module introduces the type class 'Has'.
 module Core.Has
-  ( Has (..)
+  ( Has(..)
   , grab
 
     -- * Deriving helpers
-  , Field (..)
+  , Field(..)
   ) where
 
 import Relude
@@ -111,9 +111,7 @@ grab = asks $ obtain @field
 --   } __deriving__ ('Has' Int)    __via__ 'Field' "envInt" Env
 --     __deriving__ ('Has' String) __via__ 'Field' "envString" Env
 -- @
-newtype Field (s :: Symbol) env = Field
-  { unField :: env
-  }
+newtype Field (s :: Symbol) env = Field { unField :: env }
 
 instance forall s f env . (HasField s env f) => Has f (Field s env) where
   obtain :: Field s env -> f

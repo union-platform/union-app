@@ -10,7 +10,7 @@
 -- 3. Specialize 'App' to your environment.
 -- 4. Implement desired effects for your specialized version of monad.
 module Core.Monad
-  ( App (..)
+  ( App(..)
   , runApp
   , runAppAsIO
   ) where
@@ -30,10 +30,9 @@ import Core.Error (AppException(..), ErrorWithSource)
 -- * @err@: phantom type variable that represents type of errors thrown by 'App'
 -- * @env@: application environment that stores settings and in-memory caches
 -- * @a@: monadic result
-newtype App (err :: Type) env a = App
-  { getApp :: ReaderT env IO a
-  } deriving newtype (Functor, Applicative)
-    deriving newtype (Monad, MonadIO, MonadUnliftIO, MonadFail, MonadReader env)
+newtype App (err :: Type) env a = App { getApp :: ReaderT env IO a }
+  deriving newtype (Functor, Applicative)
+  deriving newtype (Monad, MonadIO, MonadUnliftIO, MonadFail, MonadReader env)
 
 -- | This instance allows to throw and catch errors that are visible in type
 -- definitions. The implementation relies on underlying 'IO' machinery.
@@ -47,9 +46,7 @@ instance (Show err, Typeable err)
   {-# INLINE throwError #-}
 
   catchError
-    :: App err env a
-    -> (ErrorWithSource err -> App err env a)
-    -> App err env a
+    :: App err env a -> (ErrorWithSource err -> App err env a) -> App err env a
   catchError action handler = App $ ReaderT $ \env -> do
     let ioAction = runApp env action
     ioAction `catch` \(AppException e) -> runApp env $ handler e

@@ -24,4 +24,4 @@ type AppServer app = AsServerT app
 type ToApi (site :: Type -> Type) = ToServantApi site
 
 -- | Non-optional header for strictly parsed text.
-type RequiredHeader = Header' [Required, Strict]
+type RequiredHeader = Header' '[Required , Strict]

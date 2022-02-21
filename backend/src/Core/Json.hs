@@ -5,7 +5,6 @@
 -- | This module provides tools to work with JSON.
 module Core.Json
   ( packJson
-
   , jsonCamelOptions
   , jsonSumTypeOptions
   ) where
@@ -26,13 +25,13 @@ packJson = decodeUtf8 . encodePretty
 -- | Options for JSON types using train case.
 jsonCamelOptions :: Options
 jsonCamelOptions = defaultOptions
-  { omitNothingFields = True
+  { omitNothingFields  = True
   , fieldLabelModifier = fieldLabelModifier $ aesonPrefix camelCase
   }
 
 -- | Options for JSON sum types.
 jsonSumTypeOptions :: Options
 jsonSumTypeOptions = defaultOptions
-  { sumEncoding = UntaggedValue
+  { sumEncoding            = UntaggedValue
   , constructorTagModifier = map toLower
   }
