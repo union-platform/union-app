@@ -5,7 +5,7 @@
 -- | This module provides tools to work with JSON.
 module Core.Json
   ( packJson
-  , jsonCamelOptions
+  , JsonDataOptions
   , jsonSumTypeOptions
   ) where
 
@@ -13,8 +13,9 @@ import Relude
 
 import Data.Aeson
   (Options(..), SumEncoding(UntaggedValue), ToJSON, defaultOptions, encode)
-import Data.Aeson.Casing (aesonPrefix, camelCase)
 import Data.Char (toLower)
+import Deriving.Aeson
+  (FieldLabelModifier, OmitNothingFields, StringModifier(..), StripPrefix)
 import Text.Pretty.Simple (pStringNoColor)
 
 
@@ -22,12 +23,21 @@ import Text.Pretty.Simple (pStringNoColor)
 packJson :: ToJSON a => a -> Text
 packJson = toStrict . pStringNoColor . decodeUtf8 . encode
 
--- | Options for JSON types using train case.
-jsonCamelOptions :: Options
-jsonCamelOptions = defaultOptions
-  { omitNothingFields  = True
-  , fieldLabelModifier = fieldLabelModifier $ aesonPrefix camelCase
-  }
+-- | Apply function to first 'Char' in 'String'.
+applyFirst :: (Char -> Char) -> String -> String
+applyFirst _ []       = []
+applyFirst f [x     ] = [f x]
+applyFirst f (x : xs) = f x : xs
+
+-- | 'StringModifier' for camelCase.
+data CamelCase
+
+instance StringModifier CamelCase where
+  getStringModifier = applyFirst toLower
+
+-- | Options for Union JSON data types.
+type JsonDataOptions str
+  = '[OmitNothingFields , FieldLabelModifier '[StripPrefix str , CamelCase]]
 
 -- | Options for JSON sum types.
 jsonSumTypeOptions :: Options

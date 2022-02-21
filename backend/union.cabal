@@ -103,11 +103,11 @@ library
   ghc-options: -fwarn-tabs -Weverything -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-unused-do-bind -Wno-implicit-prelude -Wincomplete-uni-patterns -Wincomplete-record-updates -Wpartial-fields -Widentities -Wredundant-constraints -Wmissing-export-lists -Wunused-packages
   build-depends:
       aeson
-    , aeson-casing
     , base >=4.10 && <5
     , case-insensitive
     , co-log
     , containers
+    , deriving-aeson
     , directory
     , ekg-core
     , filepath

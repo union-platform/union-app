@@ -159,7 +159,7 @@ library:
 
     # http
     - aeson
-    - aeson-casing
+    - deriving-aeson
     - http-api-data
     - http-media
     - http-types
