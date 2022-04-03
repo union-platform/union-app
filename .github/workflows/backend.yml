@@ -60,4 +60,10 @@ jobs:
         run: stack build --pedantic
 
       - name: Run tests
-        run: stack test
+        run: |
+          PATH=$PATH:/usr/lib/postgresql/14/bin && export PATH
+          sudo systemctl start postgresql.service && pg_isready
+          git -c advice.detachedHead=false clone --depth 1 --branch 3.1 \
+            https://github.com/eradman/ephemeralpg.git
+          cd ephemeralpg && sudo make install
+          cd .. && stack test

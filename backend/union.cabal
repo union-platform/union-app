@@ -270,6 +270,8 @@ test-suite union-tests
       base >=4.10 && <5
     , hedgehog
     , jwt
+    , mmorph
+    , process
     , relude >=1.0
     , tasty
     , tasty-hedgehog
