@@ -36,8 +36,8 @@ import Command.Migrations (MigrationsCommand, migrationsParser)
 
 -- | Arguments, passed via command line arguments.
 data Arguments = Arguments
-  { oConfig  :: Maybe FilePath
-  , oCommand :: Command
+  { aConfig  :: Maybe FilePath
+  , aCommand :: Command
   }
   deriving stock (Show, Eq)
 

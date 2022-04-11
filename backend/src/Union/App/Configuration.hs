@@ -2,26 +2,27 @@
 --
 -- SPDX-License-Identifier: AGPL-3.0-or-later
 
-module Union.Configuration
-  ( defaultUnionConfig
+-- | This module describes Union configuration.
+module Union.App.Configuration
+  ( defaultConfig
 
-  -- * Configuration types
+    -- * Configuration types
   , DatabaseConfig(..)
-  , UnionConfig(..)
+  , Config(..)
 
-  -- * Tools
+    -- * Tools
   , loadConfig
   ) where
 
 import Relude
 
-import Data.Aeson (FromJSON)
-import Data.Aeson.TH (deriveJSON)
+import Data.Aeson (FromJSON, ToJSON)
 import Data.Time.Clock (NominalDiffTime)
 import Data.Yaml.Config (loadYamlSettings, useEnv)
+import Deriving.Aeson (CustomJSON(..))
 import Network.Wai.Handler.Warp (Port)
 
-import Core.Json (jsonCamelOptions)
+import Core.Json (JsonDataOptions)
 import Core.Logging (Severity(..))
 
 
@@ -38,30 +39,33 @@ data DatabaseConfig = DatabaseConfig
     -- ^ Path to migrations folder.
   }
   deriving stock (Generic, Eq, Show)
-$(deriveJSON jsonCamelOptions 'DatabaseConfig)
+  deriving (FromJSON, ToJSON) via CustomJSON (JsonDataOptions "dc") DatabaseConfig
 
 -- | Union configuration.
-data UnionConfig = UnionConfig
-  { ucAppPort  :: !Port
-  , ucDatabase :: !DatabaseConfig
-  , ucSeverity :: !Severity
+data Config = Config
+  { cAppPort  :: !Port
+    -- ^ Application web port.
+  , cDatabase :: !DatabaseConfig
+    -- ^ Database configuration.
+  , cSeverity :: !Severity
+    -- ^ Logging severity.
   }
   deriving stock (Generic, Eq, Show)
-$(deriveJSON jsonCamelOptions 'UnionConfig)
+  deriving (FromJSON, ToJSON) via CustomJSON (JsonDataOptions "c") Config
 
 -- | Helper to load config from yaml file.
 loadConfig :: FromJSON settings => FilePath -> IO settings
 loadConfig path = loadYamlSettings [path] [] useEnv
 
 -- | Default Union config.
-defaultUnionConfig :: UnionConfig
-defaultUnionConfig = UnionConfig
-  { ucAppPort  = 8080
-  , ucDatabase = DatabaseConfig
+defaultConfig :: Config
+defaultConfig = Config
+  { cAppPort  = 8080
+  , cDatabase = DatabaseConfig
     { dcPoolSize    = 100
     , dcTimeout     = 5
     , dcCredentials = "host=localhost port=5432 user=union dbname=union"
     , dcMigrations  = "./migrations"
     }
-  , ucSeverity = Info
+  , cSeverity = Info
   }

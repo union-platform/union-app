@@ -5,13 +5,13 @@
 import Relude
 
 import Test.Tasty (TestTree, defaultMain, testGroup)
-import Test.Tasty.Hedgehog (fromGroup)
 
 import Test.Jwt (jwtTests)
+import Test.Mock (MockEnv, mockEnv)
 
 
 main :: IO ()
-main = defaultMain properties
+main = mockEnv >>= defaultMain . properties
 
-properties :: TestTree
-properties = testGroup "Union tests" [fromGroup jwtTests]
+properties :: MockEnv -> TestTree
+properties env = testGroup "Union tests" [jwtTests env]

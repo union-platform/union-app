@@ -11,7 +11,10 @@ import Relude
 
 import qualified Web.JWT as Jwt
 
-import Hedgehog ((===), Gen, Group(..), Property, forAll, property, tripping)
+import Control.Monad.Morph (hoist)
+import Hedgehog ((===), Gen, Property, forAll, property, tripping)
+import Test.Tasty (TestTree, testGroup)
+import Test.Tasty.Hedgehog (testProperty)
 
 import Core.Jwt
   ( JwtPayload(..)
@@ -24,21 +27,18 @@ import Core.Jwt
 import Core.Time (Seconds(..))
 
 import Test.Gen (genInt, genSeconds, genText)
-import Test.Mock (runMockApp)
+import Test.Mock (MockEnv, runMockApp)
 
 
-jwtTests :: Group
-jwtTests = Group
+jwtTests :: MockEnv -> TestTree
+jwtTests env = testGroup
   "JWT roundtrip properties"
-  [ "fromJwtMap . toJwtMap @Int  ≡ Just"
-    `named` jwtRoundtrip genInt encodeIntIdPayload decodeIntIdPayload
-  , "fromJwtMap . toJwtMap @Text ≡ Just"
-    `named` jwtRoundtrip genText encodeTextIdPayload decodeTextIdPayload
-  , "verifyJwt  . createJwt      ≡ True" `named` createAndVerifyJwt
+  [ testProperty "fromJwtMap . toJwtMap @Int  ≡ Just"
+    $ jwtRoundtrip genInt encodeIntIdPayload decodeIntIdPayload
+  , testProperty "fromJwtMap . toJwtMap @Text ≡ Just"
+    $ jwtRoundtrip genText encodeTextIdPayload decodeTextIdPayload
+  , testProperty "verifyJwt  . createJwt      ≡ True" $ createAndVerifyJwt env
   ]
-  where
-    named :: a -> b -> (a, b)
-    named = (,)
 
 jwtRoundtrip
   :: (Eq a, Show a)
@@ -53,13 +53,12 @@ jwtRoundtrip gen encode decode = property $ do
   randomPayload <- JwtPayload <$> forAll gen
   tripping randomPayload encode decode
 
-createAndVerifyJwt :: Property
-createAndVerifyJwt = property $ do
+createAndVerifyJwt :: MockEnv -> Property
+createAndVerifyJwt env = property . hoist (runMockApp env) $ do
   seconds         <- forAll genSeconds
   payload         <- forAll genPayload
-  verifiedPayload <- liftIO $ runMockApp $ makeAndVerifyToken seconds payload
+  verifiedPayload <- lift $ makeAndVerifyToken seconds payload
   verifiedPayload === Just payload
-
 
 genPayload :: Gen (JwtPayload Int)
 genPayload = JwtPayload <$> genInt

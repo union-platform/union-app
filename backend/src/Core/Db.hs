@@ -10,8 +10,12 @@ module Core.Db
   , withDb
   , withPool
 
-    -- * Working with DB
+    -- * Accessing DB
+  , toTransaction
   , runTransaction
+  , runStatement
+
+    -- * Migrations
   , migrate
   , getAppliedMigrations
   , showMigration
@@ -34,13 +38,14 @@ import Hasql.Migration
   )
 import Hasql.Pool (UsageError)
 import Hasql.Session (Session)
-import Hasql.Transaction (Transaction, sql)
+import Hasql.Statement (Statement)
+import Hasql.Transaction (Transaction, sql, statement)
 import Hasql.Transaction.Sessions
   (IsolationLevel(Serializable), Mode(Write), transaction)
 
 import Core.Error (WithError, liftError)
 import Core.Has (Has, grab)
-import Core.Logging (logIO)
+import Core.Logging (Severity(Error))
 
 
 -- | Constraint for monadic actions that wants access to database.
@@ -50,14 +55,14 @@ type WithDb env m = (MonadReader env m, Has DbPool env, MonadIO m)
 type DbPool = Pool.Pool
 
 -- | Create 'Pool.Pool'.
-createPool :: HasCallStack => Int -> NominalDiffTime -> Text -> IO DbPool
-createPool size timeout credentials = logIO "Creating DB pool..."
-  >> Pool.acquire (size, timeout, encodeUtf8 credentials)
+createPool :: Int -> NominalDiffTime -> Text -> IO DbPool
+createPool size timeout credentials =
+  Pool.acquire (size, timeout, encodeUtf8 credentials)
 {-# INLINE createPool #-}
 
 -- | Release 'Pool.Pool'.
-destroyPool :: HasCallStack => DbPool -> IO ()
-destroyPool p = logIO "Destroying DB pool..." >> Pool.release p
+destroyPool :: DbPool -> IO ()
+destroyPool = Pool.release
 {-# INLINE destroyPool #-}
 
 -- | Helper to establish connection safely.
@@ -69,15 +74,27 @@ withDb size timeout credentials =
 withPool :: (WithDb env m, WithError UsageError m) => Session a -> m a
 withPool action = do
   pool <- grab @DbPool
-  liftIO (Pool.use pool action) >>= liftError
+  withFrozenCallStack (liftIO (Pool.use pool action) >>= liftError Error)
 {-# INLINE withPool #-}
 
 
+-- | Creates 'Transaction' from 'Statement.
+toTransaction :: Statement () a -> Transaction a
+toTransaction = statement ()
+{-# INLINE toTransaction #-}
+
 -- | Runs 'Transaction' with 'DbPool'.
 runTransaction
-  :: (WithDb env m, WithError UsageError m) => Transaction b -> m b
-runTransaction = withPool . transaction Serializable Write
+  :: (WithDb env m, WithError UsageError m) => Transaction a -> m a
+runTransaction =
+  withFrozenCallStack (withPool . transaction Serializable Write)
 {-# INLINE runTransaction #-}
+
+-- | Runs 'Statement' as 'Transaction'.
+runStatement :: (WithDb env m, WithError UsageError m) => Statement () a -> m a
+runStatement = withFrozenCallStack (runTransaction . toTransaction)
+{-# INLINE runStatement #-}
+
 
 -- | Launch all migrations from provided dir.
 migrate

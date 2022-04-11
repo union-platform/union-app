@@ -12,7 +12,8 @@
 module Core.Monad
   ( App(..)
   , runApp
-  , runAppAsIO
+  , runAppIO
+  , runAppLogIO
   ) where
 
 import Relude
@@ -23,7 +24,8 @@ import Control.Monad.Except (MonadError(..))
 import Control.Monad.IO.Unlift (MonadUnliftIO(..))
 import Prometheus (MonadMonitor(..))
 
-import Core.Error (AppException(..), ErrorWithSource)
+import Core.Error (AppException(..), ErrorWithSource(..), toLogMsg)
+import Core.Logging (Log, WithLog, logMsg)
 
 
 -- | Main application monad. It has the following type variables:
@@ -60,17 +62,29 @@ instance MonadMonitor (App err env) where
 
 -- | Run application by providing environment.
 -- Throws 'AppException' if application has unhandled 'throwError'. Use
--- 'runAppAsIO' to handle exceptions as well.
+-- 'runAppIO' to handle exceptions as well.
 runApp :: env -> App err env a -> IO a
 runApp env = usingReaderT env . getApp
 {-# INLINE runApp #-}
 
 -- | Like 'runApp' but also catches 'AppException' and unwraps 'ErrorWithSource'
 -- from it. Use this function to handle errors outside 'App' monad.
-runAppAsIO
+runAppIO
   :: (Show err, Typeable err)
   => env
   -> App err env a
   -> IO (Either (ErrorWithSource err) a)
-runAppAsIO env = firstF getAppException . try . runApp env
-{-# INLINE runAppAsIO #-}
+runAppIO env = firstF getAppException . try . runApp env
+{-# INLINE runAppIO #-}
+
+-- | Like 'runAppIO' but also logs error.
+runAppLogIO
+  :: (Show err, Typeable err, WithLog env Log (App err env))
+  => env
+  -> App err env a
+  -> IO (Either (ErrorWithSource err) a)
+runAppLogIO env app = do
+  appRes <- runAppIO env app
+  logRes <- whenLeft (Right ()) appRes logger
+  pure $ appRes <* logRes
+  where logger = runAppIO env . logMsg . toLogMsg

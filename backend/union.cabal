@@ -38,13 +38,14 @@ library
       Core.Measure
       Core.Monad
       Core.Random
-      Core.Servant
       Core.Swagger
       Core.Time
       Union
       Union.API
-      Union.Application
-      Union.Configuration
+      Union.App.Configuration
+      Union.App.Db
+      Union.App.Env
+      Union.App.Error
   other-modules:
       Paths_union
   autogen-modules:
@@ -102,11 +103,11 @@ library
   ghc-options: -fwarn-tabs -Weverything -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-unused-do-bind -Wno-implicit-prelude -Wincomplete-uni-patterns -Wincomplete-record-updates -Wpartial-fields -Widentities -Wredundant-constraints -Wmissing-export-lists -Wunused-packages
   build-depends:
       aeson
-    , aeson-casing
-    , aeson-pretty
     , base >=4.10 && <5
+    , case-insensitive
     , co-log
     , containers
+    , deriving-aeson
     , directory
     , ekg-core
     , filepath
@@ -116,13 +117,16 @@ library
     , hasql-transaction
     , http-api-data
     , http-media
+    , http-types
     , jwt
     , mtl
+    , network
     , openapi3
     , optparse-applicative
     , pretty-simple
     , prometheus-client
     , random
+    , rel8
     , relude >=1.0
     , safe-exceptions
     , scientific
@@ -266,6 +270,8 @@ test-suite union-tests
       base >=4.10 && <5
     , hedgehog
     , jwt
+    , mmorph
+    , process
     , relude >=1.0
     , tasty
     , tasty-hedgehog

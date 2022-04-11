@@ -4,19 +4,12 @@
 
 module Union.API
   ( API
-  , api
   ) where
-
-import Relude
 
 import Servant (type (:>), Get, JSON)
 
-import Union.Configuration (UnionConfig)
+import Union.App.Configuration (Config)
 
 
 -- This is main API type (currently, it's sample only).
-type API = "config" :> Get '[JSON] UnionConfig
-
--- 'Proxy' to 'API'.
-api :: Proxy API
-api = Proxy
+type API = "config" :> Get '[JSON] Config
