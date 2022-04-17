@@ -24,6 +24,7 @@ import Network.Wai.Handler.Warp (Port)
 
 import Core.Json (JsonDataOptions)
 import Core.Logging (Severity(..))
+import Core.Time (Seconds(..))
 
 
 -- | Database configuration.
@@ -39,16 +40,20 @@ data DatabaseConfig = DatabaseConfig
     -- ^ Path to migrations folder.
   }
   deriving stock (Generic, Eq, Show)
-  deriving (FromJSON, ToJSON) via CustomJSON (JsonDataOptions "dc") DatabaseConfig
+  deriving (FromJSON, ToJSON) via CustomJSON
+    (JsonDataOptions "dc")
+    DatabaseConfig
 
 -- | Union configuration.
 data Config = Config
-  { cAppPort  :: !Port
+  { cAppPort   :: !Port
     -- ^ Application web port.
-  , cDatabase :: !DatabaseConfig
+  , cDatabase  :: !DatabaseConfig
     -- ^ Database configuration.
-  , cSeverity :: !Severity
+  , cSeverity  :: !Severity
     -- ^ Logging severity.
+  , cJwtExpire :: !Seconds
+    -- ^ How many seconds JWT will be valid.
   }
   deriving stock (Generic, Eq, Show)
   deriving (FromJSON, ToJSON) via CustomJSON (JsonDataOptions "c") Config
@@ -60,12 +65,13 @@ loadConfig path = loadYamlSettings [path] [] useEnv
 -- | Default Union config.
 defaultConfig :: Config
 defaultConfig = Config
-  { cAppPort  = 8080
-  , cDatabase = DatabaseConfig
+  { cAppPort   = 8080
+  , cDatabase  = DatabaseConfig
     { dcPoolSize    = 100
     , dcTimeout     = 5
     , dcCredentials = "host=localhost port=5432 user=union dbname=union"
     , dcMigrations  = "./migrations"
     }
-  , cSeverity = Info
+  , cSeverity  = Info
+  , cJwtExpire = Seconds 86400
   }

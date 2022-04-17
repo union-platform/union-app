@@ -9,3 +9,4 @@ database:
   credentials: "host=localhost port=5432 user=union dbname=union"
   migrations: "./migrations"
 severity: debug
+jwtExpire: 86400

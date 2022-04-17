@@ -70,13 +70,14 @@ newtype JwtPayload a = JwtPayload { unJwtPayload :: a }
 
 -- | Encodes 'JwtPayload' that stores 'Int' as payload with name @id@. Use it if
 -- you store ids as integer values. Dual to 'decodeIntIdPayload'.
-encodeIntIdPayload :: JwtPayload Int -> Jwt.ClaimsMap
+encodeIntIdPayload :: Integral a => JwtPayload a -> Jwt.ClaimsMap
 encodeIntIdPayload = payloadToMap . Json.Number . fromIntegral . unJwtPayload
 {-# INLINE encodeIntIdPayload #-}
 
 -- | Decodes 'JwtPayload' from 'Jwt.ClaimsMap' that stores 'Int' under name
 -- @id@. Dual to 'encodeIntIdPayload'.
-decodeIntIdPayload :: Jwt.ClaimsMap -> Maybe (JwtPayload Int)
+decodeIntIdPayload
+  :: (Integral a, Bounded a) => Jwt.ClaimsMap -> Maybe (JwtPayload a)
 decodeIntIdPayload = fmap JwtPayload . payloadFromMap
   (\case
     Json.Number jwtId -> toBoundedInteger jwtId

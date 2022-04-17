@@ -9,3 +9,4 @@ database:
   credentials: ""
   migrations: "../migrations"
 severity: error
+jwtExpire: 5
