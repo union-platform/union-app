@@ -6,7 +6,7 @@ appPort: 8080
 database:
   poolSize: 100
   timeout: 5
-  credentials: "host=localhost port=5432 user=union dbname=union"
+  credentials: "host=localhost port=5432 user=union_app dbname=union_app password=union_app"
   migrations: "./migrations"
 severity: debug
 jwtExpire: 86400
