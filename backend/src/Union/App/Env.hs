@@ -18,23 +18,29 @@ module Union.App.Env
   , WithLog
   , WithError
   , WithJwt
+  , WithSender
   ) where
 
 import Relude
 
+import Network.HTTP.Req (HttpException(..))
 import Servant.Server.Generic (AsServerT)
+import UnliftIO.Exception (catch)
 
 import qualified Core
+import qualified Service.Twilio as Twilio
 
 import Core.Db (DbPool)
 import Core.Has (Has)
-import Core.Jwt (JwtPayload, JwtSecret(JwtSecret), JwtToken, MonadJwt)
-import Core.Logging (Log, LogAction, logError)
+import Core.Jwt (JwtPayload, JwtSecret(..), JwtToken, MonadJwt)
+import Core.Logging (Log, LogAction, Severity(..), logError, logException)
+import Core.Sender
+  (AuthToken, ConfirmationCode, MonadSender(..), Phone, SenderAccount)
 import Core.Time (Seconds)
 
 import Union.App.Configuration
   (Config(..), DatabaseConfig(..), defaultConfig, loadConfig)
-import Union.App.Error (Error)
+import Union.App.Error (Error(..))
 
 
 -- | Main application monad.
@@ -55,20 +61,26 @@ type WithError m = Core.WithError Error m
 -- | Constraint to actions with Jwt generation / verification.
 type WithJwt m = MonadJwt Int64 m
 
+-- | Constraint to actions with Sender service.
+type WithSender m = MonadSender m
+
 
 -- | Helper to simplify deriving for 'Env'.
 type EnvField f = Core.Field f Env
 
 -- | Union environment.
 data Env = Env
-  { eConfig    :: !Config
-  , eDbPool    :: !DbPool
-  , eLogger    :: !(LogAction App Log)
-  , eJwtSecret :: !JwtSecret
+  { eConfig        :: !Config
+  , eDbPool        :: !DbPool
+  , eLogger        :: !(LogAction App Log)
+  , eJwtSecret     :: !JwtSecret
+  , eSenderService :: !(SenderAccount, AuthToken)
+    -- ^ Stores Twilio account and auth token.
   }
-  deriving (Has Config)    via EnvField "eConfig"
-  deriving (Has DbPool)    via EnvField "eDbPool"
-  deriving (Has JwtSecret) via EnvField "eJwtSecret"
+  deriving (Has Config)                     via EnvField "eConfig"
+  deriving (Has DbPool)                     via EnvField "eDbPool"
+  deriving (Has JwtSecret)                  via EnvField "eJwtSecret"
+  deriving (Has (SenderAccount, AuthToken)) via EnvField "eSenderService"
 
 -- | Instance to specify how to get and update the 'LogAction' stored inside
 -- the 'Env'.
@@ -93,13 +105,34 @@ instance (Integral a, Bounded a) => MonadJwt a App where
     secret <- Core.grab @JwtSecret
     Core.verifyJwtTokenImpl Core.decodeIntIdPayload secret token
 
+-- | Instance to specify how to generate and send 'ConfirmationCode'.
+instance MonadSender App where
+  sendCode :: HasCallStack => Phone -> ConfirmationCode -> App ()
+  sendCode to code = do
+    (account, token) <- Core.grab @(SenderAccount, AuthToken)
+    cSenderPhone <$> Core.grab @Config >>= \case
+      Just senderPhone -> do
+        result <- Twilio.sendSms account token senderPhone to code `catch` \case
+          VanillaHttpException e -> do
+            logException e >> Core.throwError
+              Error
+              (ApiError "Cannot send confirmation code")
+          JsonHttpException e -> Core.throwError Error . ApiError $ toText e
+        case result of
+          Left  e -> Core.throwError Error $ ApiError e
+          Right _ -> pass
+      Nothing -> pass
+
 -- | Create Union 'Env' with given path to 'Config'.
 buildEnv :: Maybe FilePath -> IO Env
 buildEnv path = do
   eConfig <- maybe (pure defaultConfig) loadConfig path
   let DatabaseConfig {..} = cDatabase eConfig
   let eLogger             = Core.setLogger $ cSeverity eConfig
-  eJwtSecret <- JwtSecret <$> Core.mkRandomString 10
+  eJwtSecret    <- JwtSecret <$> Core.mkRandomString 10
+  senderAccount <- Twilio.findSenderAccount
+  senderToken   <- Twilio.findAuthToken
+  let eSenderService = (senderAccount, senderToken)
   Core.withDb dcPoolSize dcTimeout dcCredentials $ \eDbPool -> pure Env { .. }
 
 -- | Runs provided action with new 'Env'.
@@ -109,5 +142,5 @@ runWithEnv path action = buildEnv path >>= flip Core.runApp action
 
 -- | Helper to kill the app.
 kill :: (MonadReader env m, MonadFail m, WithLog m) => Text -> m b
-kill msg = withFrozenCallStack (logError msg >> fail "Check logs 🠑")
+kill msg = withFrozenCallStack (logError msg >> fail "Check logs ⇡")
 {-# INLINE kill #-}

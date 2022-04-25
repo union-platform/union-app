@@ -38,8 +38,10 @@ library
       Core.Measure
       Core.Monad
       Core.Random
+      Core.Sender
       Core.Swagger
       Core.Time
+      Service.Twilio
       Union
       Union.API
       Union.App.Configuration
@@ -104,6 +106,7 @@ library
   build-depends:
       aeson
     , base >=4.10 && <5
+    , base64-bytestring
     , case-insensitive
     , co-log
     , containers
@@ -128,12 +131,14 @@ library
     , random
     , rel8
     , relude >=1.0
+    , req
     , safe-exceptions
     , scientific
     , servant
     , servant-server
     , text
     , time
+    , unliftio
     , unliftio-core
     , unordered-containers
     , wai

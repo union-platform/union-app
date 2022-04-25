@@ -141,10 +141,14 @@ library:
     - random
     - safe-exceptions
     - scientific
-    - text
     - time
+    - unliftio
     - unliftio-core
     - unordered-containers
+
+    # text
+    - base64-bytestring
+    - text
 
     # monitoring
     - ekg-core
@@ -166,6 +170,7 @@ library:
     - jwt
     - network
     - openapi3
+    - req
     - servant
     - servant-server
     - wai

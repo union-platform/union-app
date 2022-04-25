@@ -5,7 +5,10 @@
 -- | This module provides tools to work with JSON.
 module Core.Json
   ( packJson
-  , JsonDataOptions
+
+    -- * Helpers to create JSON instances
+  , JsonCamelCase
+  , JsonSnakeCase
   , jsonSumTypeOptions
   ) where
 
@@ -15,7 +18,12 @@ import Data.Aeson
   (Options(..), SumEncoding(UntaggedValue), ToJSON, defaultOptions, encode)
 import Data.Char (toLower)
 import Deriving.Aeson
-  (FieldLabelModifier, OmitNothingFields, StringModifier(..), StripPrefix)
+  ( CamelToSnake
+  , FieldLabelModifier
+  , OmitNothingFields
+  , StringModifier(..)
+  , StripPrefix
+  )
 import Text.Pretty.Simple (pStringNoColor)
 
 
@@ -33,11 +41,18 @@ applyFirst f (x : xs) = f x : xs
 data CamelCase
 
 instance StringModifier CamelCase where
+  getStringModifier :: String -> String
   getStringModifier = applyFirst toLower
+  {-# INLINE getStringModifier #-}
 
--- | Options for Union JSON data types.
-type JsonDataOptions str
+
+-- | Options for Union JSON data types in camelCase.
+type JsonCamelCase str
   = '[OmitNothingFields , FieldLabelModifier '[StripPrefix str , CamelCase]]
+
+-- | Options for Union JSON data types in snake_case.
+type JsonSnakeCase str
+  = '[OmitNothingFields , FieldLabelModifier '[StripPrefix str , CamelToSnake]]
 
 -- | Options for JSON sum types.
 jsonSumTypeOptions :: Options

@@ -17,7 +17,7 @@ module Core.Error
   , AppException(..)
   , toNoSourceException
 
-    -- * Helper unctions
+    -- * Helper functions
   , toAppError
   , toLogMsg
   , throwOnNothing

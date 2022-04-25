@@ -27,6 +27,8 @@ module Core
     -- should be build.
   , module Core.Random
     -- "Core.Random" contains functions to work with randomness.
+  , module Core.Sender
+    -- "Core.Sender" provides sender services functionality.
   , module Core.Swagger
     -- "Core.Swagger" contains helper functions to create @swagger@ instances.
   , module Core.Time
@@ -42,5 +44,6 @@ import Core.Logging
 import Core.Measure
 import Core.Monad
 import Core.Random
+import Core.Sender
 import Core.Swagger
 import Core.Time
