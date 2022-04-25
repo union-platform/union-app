@@ -44,6 +44,7 @@ library
       Service.Twilio
       Union
       Union.API
+      Union.Account.Schema
       Union.App.Configuration
       Union.App.Db
       Union.App.Env
