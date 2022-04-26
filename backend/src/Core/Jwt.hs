@@ -37,6 +37,7 @@ import qualified Data.Map as Map
 import qualified Web.JWT as Jwt
 
 import Data.Aeson (FromJSON, ToJSON, Value)
+import Data.OpenApi (ToParamSchema, ToSchema)
 import Data.Scientific (toBoundedInteger)
 import Data.Time.Clock.POSIX (getPOSIXTime)
 import Web.HttpApiData (FromHttpApiData)
@@ -54,8 +55,9 @@ newtype JwtSecret = JwtSecret { getJwtSecret :: Text }
 
 -- | Encoded JSON web token.
 newtype JwtToken = JwtToken { getJwtToken :: Text }
-  deriving newtype (Eq, Ord, Hashable, FromHttpApiData, FromJSON, ToJSON)
   deriving stock (Show, Generic)
+  deriving newtype (Eq, Ord, Hashable)
+  deriving newtype (FromHttpApiData, FromJSON, ToJSON, ToParamSchema, ToSchema)
 
 -- | Stores arbitrary payload. If you want to store your custom payload, you
 -- need to specify two functions:
@@ -65,8 +67,8 @@ newtype JwtToken = JwtToken { getJwtToken :: Text }
 -- See examples in this module: 'encodeIntIdPayload', 'decodeIntIdPayload',
 -- 'encodeTextIdPayload', 'decodeTextIdPayload'.
 newtype JwtPayload a = JwtPayload { getJwtPayload :: a }
-  deriving newtype (Eq)
   deriving stock (Show, Functor)
+  deriving newtype (Eq)
 
 -- | Encodes 'JwtPayload' that stores 'Int' as payload with name @id@. Use it if
 -- you store ids as integer values. Dual to 'decodeIntIdPayload'.

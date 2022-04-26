@@ -19,6 +19,7 @@ import Relude
 
 import Core.Random (mkRandomDigits)
 import Data.Aeson (FromJSON, ToJSON)
+import Data.OpenApi (ToParamSchema, ToSchema)
 import Rel8 (DBEq, DBType)
 import Text.Regex (matchRegex, mkRegex)
 
@@ -27,7 +28,9 @@ import Text.Regex (matchRegex, mkRegex)
 -- plus sign.
 newtype Phone = Phone { getPhone :: Text }
   deriving stock Generic
-  deriving newtype (Show, Eq, ToJSON, FromJSON, DBType, DBEq)
+  deriving newtype (Show, Eq, DBType, DBEq)
+  deriving newtype (ToJSON, FromJSON, ToParamSchema, ToSchema)
+
 
 -- | Simple 'Phone' validation.
 isPhoneValid :: Phone -> Bool
@@ -48,7 +51,8 @@ newtype AuthToken = AuthToken { getAuthToken :: Text }
 -- | Confirmation code.
 newtype ConfirmationCode = ConfirmationCode { getCode :: Text }
   deriving stock (Show, Generic)
-  deriving newtype (Eq, ToJSON, FromJSON, DBType, DBEq)
+  deriving newtype (Eq, DBType, DBEq)
+  deriving newtype (ToJSON, FromJSON, ToParamSchema, ToSchema)
 
 
 -- | This monad represents effect to send something to user.

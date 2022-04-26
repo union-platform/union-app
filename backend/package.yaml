@@ -137,6 +137,7 @@ library:
     - containers
     - directory
     - filepath
+    - lens
     - mtl
     - random
     - safe-exceptions
@@ -173,7 +174,9 @@ library:
     - openapi3
     - req
     - servant
+    - servant-openapi3
     - servant-server
+    - servant-swagger-ui
     - wai
     - warp
 

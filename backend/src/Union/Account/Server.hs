@@ -13,7 +13,8 @@ import Relude
 
 import Network.Socket (SockAddr)
 import Servant ((:>), JSON, Post, ReqBody)
-import Servant.API (Header, NoContent(..), PostCreated, RemoteHost, Summary)
+import Servant.API
+  (Description, Header, NoContent(..), PostCreated, RemoteHost, Summary)
 import Servant.API.Generic ((:-), ToServantApi)
 
 import Core.Error (throwError)
@@ -38,12 +39,20 @@ data AccountEndpoints route = AccountEndpoints
       :> "signIn"
       :> "request"
       :> Summary "Request code to Sign In"
+      :> Description
+        "First step in Sign In process. At this step user requests confirmation \
+        \code, which we will send to provided phone. If there is no account with\
+        \ such phone - we will create it and send code then."
       :> ReqBody '[JSON] RequestCodeReq
       :> PostCreated '[JSON] NoContent
   , _signIn :: route
       :- "accounts"
       :> "signIn"
       :> Summary "Sign In to account"
+      :> Description
+        "Second step in Sign In process. At this step user confirms that account\
+        \ belongs to him - we expect phone number and confirmation code, which \
+        \was sent at previous step. As a result - user will get JWT token."
       :> RemoteHost
       :> Header "User-Agent" UserAgent
       :> ReqBody '[JSON] SignInReq

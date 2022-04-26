@@ -126,6 +126,7 @@ library
     , http-media
     , http-types
     , jwt
+    , lens
     , mtl
     , network
     , openapi3
@@ -140,7 +141,9 @@ library
     , safe-exceptions
     , scientific
     , servant
+    , servant-openapi3
     , servant-server
+    , servant-swagger-ui
     , text
     , time
     , unliftio

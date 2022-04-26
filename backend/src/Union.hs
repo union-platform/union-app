@@ -23,7 +23,7 @@ import Union.Server (application)
 
 
 -- | Union entrypoint.
-union :: Maybe FilePath -> IO ()
+union :: HasCallStack => Maybe FilePath -> IO ()
 union configPath = runWithEnv configPath $ do
   config@Config {..} <- Core.grab @Config
   logInfo $ "Starting application with configuration: \n" <> packJson config

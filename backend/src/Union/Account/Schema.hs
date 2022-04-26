@@ -24,6 +24,7 @@ import Relude
 import qualified Rel8 as Sql
 
 import Data.Aeson (FromJSON, ToJSON)
+import Data.OpenApi (ToParamSchema, ToSchema)
 import Data.Time.Clock (UTCTime)
 import Rel8
   (Column, DBEnum(..), DBEq, DBType, Name, Rel8able, Result, TableSchema(..))
@@ -100,7 +101,8 @@ confirmationSchema = TableSchema
 -- | Represents 'User-Agent' header.
 newtype UserAgent = UserAgent { getUserAgent :: Text }
   deriving stock (Generic)
-  deriving newtype (Show, Eq, ToJSON, FromJSON, DBType, DBEq, FromHttpApiData)
+  deriving newtype (Show, Eq, DBType, DBEq)
+  deriving newtype (ToJSON, FromJSON, FromHttpApiData, ToParamSchema, ToSchema)
 
 -- | Auth log.
 data AuthLog f = AuthLog
