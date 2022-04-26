@@ -224,9 +224,12 @@ test-suite union-tests
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Test.Account
+      Test.Arbitrary
       Test.Gen
       Test.Jwt
       Test.Mock
+      Test.Swagger
       Paths_union
   hs-source-dirs:
       tests
@@ -280,15 +283,28 @@ test-suite union-tests
       ViewPatterns
   ghc-options: -fwarn-tabs -Weverything -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-unused-do-bind -Wno-implicit-prelude -Wincomplete-uni-patterns -Wincomplete-record-updates -Wpartial-fields -Widentities -Wredundant-constraints -Wmissing-export-lists -Wunused-packages -Wno-incomplete-patterns -Wno-incomplete-uni-patterns -threaded -eventlog "-with-rtsopts=-N -A64m -AL256m"
   build-depends:
-      base >=4.10 && <5
+      QuickCheck
+    , base >=4.10 && <5
     , hedgehog
+    , hspec
+    , http-client
+    , http-types
     , jwt
     , mmorph
     , process
+    , quickcheck-instances
+    , rel8
     , relude >=1.0
+    , servant-client
+    , servant-client-core
+    , servant-openapi3
+    , servant-server
     , tasty
     , tasty-hedgehog
+    , tasty-hspec
+    , tasty-hunit
     , union
+    , warp
   if impl(ghc >= 8.10.0)
     ghc-options: -Wno-prepositive-qualified-module -Wno-inferred-safe-imports -Wno-missing-safe-haskell-mode
   default-language: Haskell2010

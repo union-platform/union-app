@@ -1,17 +1,22 @@
--- SPDX-FileCopyrightText: 2021 Union
+-- SPDX-FileCopyrightText: 2021-2022 Union
 --
 -- SPDX-License-Identifier: AGPL-3.0-or-later
 
 import Relude
 
-import Test.Tasty (TestTree, defaultMain, testGroup)
+import Test.Tasty (defaultMain, testGroup)
 
+import Test.Account (accountTests)
 import Test.Jwt (jwtTests)
-import Test.Mock (MockEnv, mockEnv)
+import Test.Mock (initMockApp, mockEnv)
+import Test.Swagger (swaggerTests)
 
 
 main :: IO ()
-main = mockEnv >>= defaultMain . properties
+main = do
+  env <- mockEnv
+  initMockApp env
 
-properties :: MockEnv -> TestTree
-properties env = testGroup "Union tests" [jwtTests env]
+  swagger <- swaggerTests
+  defaultMain
+    $ testGroup "Union tests" [swagger, jwtTests env, accountTests env]

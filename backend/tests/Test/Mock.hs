@@ -5,68 +5,90 @@
 -- | Mock monad for testing purposes.
 module Test.Mock
   ( MockApp
-  , MockEnv
   , mockEnv
   , runMockApp
+  , initMockApp
+  , withClient
+  , apiStatusCode
   ) where
 
 import Relude
 
+import Control.Exception (throwIO)
+import Network.HTTP.Client (defaultManagerSettings, newManager)
+import Network.HTTP.Types (Status)
+import Network.Wai.Handler.Warp (testWithApplication)
+import Servant.Client
+  ( BaseUrl(..)
+  , ClientError(..)
+  , ClientM
+  , mkClientEnv
+  , parseBaseUrl
+  , responseStatusCode
+  , runClientM
+  )
+import Servant.Server (Application, serve)
 import System.Process (readProcess)
 
 import qualified Core
 
-import Core.Db (DbPool)
-import Core.Has (Has)
-import Core.Jwt
-  ( JwtSecret(..)
-  , MonadJwt(..)
-  , decodeIntIdPayload
-  , encodeIntIdPayload
-  , mkJwtTokenImpl
-  , verifyJwtTokenImpl
-  )
-import Core.Monad (App, runApp)
+import Core.Jwt (JwtSecret(..))
+import Core.Logging (LogAction(..))
+import Core.Monad (runApp)
+import Core.Sender (AuthToken(..), SenderAccount(..))
 import Union.App.Configuration
   (Config(..), DatabaseConfig(..), defaultConfig, loadConfig)
+import Union.App.Db (runDb)
+import Union.App.Env (Env(..))
+import Union.App.Error (Error)
+import Union.Server (api, server)
 
 
 -- | Mock monad.
-type MockApp = App () MockEnv
+type MockApp = Core.App Error Env
 
--- | Environment for 'MockApp'.
-data MockEnv = MockEnv
-  { meConfig    :: !Config
-  , meJwtSecret :: JwtSecret
-  , meDbPool    :: !DbPool
-  }
-  deriving (Has Config)    via Core.Field "meConfig"    MockEnv
-  deriving (Has JwtSecret) via Core.Field "meJwtSecret" MockEnv
-  deriving (Has DbPool)    via Core.Field "meDbPool"    MockEnv
-
-instance MonadJwt Int MockApp where
-  mkJwtToken expiry payload = do
-    secret <- Core.grab @JwtSecret
-    mkJwtTokenImpl encodeIntIdPayload secret expiry payload
-
-  verifyJwtToken token = do
-    secret <- Core.grab @JwtSecret
-    verifyJwtTokenImpl decodeIntIdPayload secret token
-
--- | Create Union 'MockEnv' from test config, but with temp db, created by
+-- | Create Union 'Env' from test config, but with temp db, created by
 -- separate script.
-mockEnv :: IO MockEnv
+mockEnv :: IO Env
 mockEnv = do
   cfg <- maybe (pure defaultConfig) loadConfig (Just "./tests/config.yaml")
   db  <- readProcess "sh" ["-c", "./tests/setup-db.sh"] []
   let
-    meConfig =
-      cfg { cDatabase = (cDatabase cfg) { dcCredentials = toText db } }
-  let meJwtSecret         = JwtSecret "0123456789"
-  let DatabaseConfig {..} = cDatabase meConfig
-  Core.withDb dcPoolSize dcTimeout dcCredentials
-    $ \meDbPool -> pure MockEnv { .. }
+    eConfig = cfg { cDatabase = (cDatabase cfg) { dcCredentials = toText db } }
+  let DatabaseConfig {..} = cDatabase eConfig
+  let eLogger             = LogAction $ const pass
+  let eJwtSecret          = JwtSecret "0123456789"
+  let eSenderService      = (SenderAccount "0123456789", AuthToken "0123456789")
+  Core.withDb dcPoolSize dcTimeout dcCredentials $ \eDbPool -> pure Env { .. }
 
 -- | 'MockApp' runner.
-runMockApp :: MockEnv -> MockApp a -> IO a
+runMockApp :: Env -> MockApp a -> IO a
 runMockApp = runApp
+
+-- | Initialize 'MockApp'.
+initMockApp :: Env -> IO ()
+initMockApp env = runApp env $ do
+  Config {..} <- Core.grab @Config
+  void . runDb . Core.migrate $ dcMigrations cDatabase
+
+mockApplication :: Env -> Application
+mockApplication = serve api . server
+
+-- Creating a new Manager is a relatively expensive operation, so we will try
+-- share a single Manager between tests.
+withClient :: Env -> ClientM a -> IO a
+withClient env action = do
+  runApp env
+    . liftIO
+    . testWithApplication (pure $ mockApplication env)
+    $ \port -> do
+        baseUrl <- parseBaseUrl "http://localhost"
+        manager <- newManager defaultManagerSettings
+        let clientEnv = mkClientEnv manager (baseUrl { baseUrlPort = port })
+        runClientM action clientEnv >>= either throwIO pure
+
+-- | Checks that returned 'Status' is expected.
+apiStatusCode :: Status -> ClientError -> Bool
+apiStatusCode status servantError = case servantError of
+  FailureResponse _ response -> responseStatusCode response == status
+  _                          -> False

@@ -6,6 +6,8 @@
 -- functions writing.
 module Union.Server
   ( application
+  , api
+  , server
   ) where
 
 import Relude

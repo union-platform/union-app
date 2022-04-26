@@ -227,10 +227,23 @@ tests:
     dependencies:
       - union
 
-      - tasty
       - hedgehog
+      - hspec
+      - QuickCheck
+      - quickcheck-instances
+      - tasty
       - tasty-hedgehog
+      - tasty-hspec
+      - tasty-hunit
 
+      - http-client
+      - http-types
       - jwt
       - mmorph
       - process
+      - rel8
+      - servant-client
+      - servant-client-core
+      - servant-openapi3
+      - servant-server
+      - warp
