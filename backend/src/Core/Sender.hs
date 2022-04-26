@@ -36,12 +36,12 @@ isPhoneValid phone = isJust . matchRegex r . toString $ getPhone phone
 {-# INLINE isPhoneValid #-}
 
 -- | Represents sender service Account.
-newtype SenderAccount = SenderAccount { unSenderAccount :: Text }
+newtype SenderAccount = SenderAccount { getSenderAccount :: Text }
   deriving stock (Show, Generic)
   deriving newtype (Eq, FromJSON, ToJSON)
 
 -- | Represents sender server Auth Token.
-newtype AuthToken = AuthToken { unAuthToken :: Text }
+newtype AuthToken = AuthToken { getAuthToken :: Text }
   deriving stock (Show, Generic)
   deriving newtype (Eq, FromJSON, ToJSON)
 

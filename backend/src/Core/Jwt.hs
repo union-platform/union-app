@@ -50,10 +50,10 @@ import Core.Time (Seconds(..))
 -- @
 -- jwtSecret <- 'JwtSecret' \<$\> mkRandomString 10
 -- @
-newtype JwtSecret = JwtSecret { unJwtSecret :: Text }
+newtype JwtSecret = JwtSecret { getJwtSecret :: Text }
 
 -- | Encoded JSON web token.
-newtype JwtToken = JwtToken { unJwtToken :: Text }
+newtype JwtToken = JwtToken { getJwtToken :: Text }
   deriving newtype (Eq, Ord, Hashable, FromHttpApiData, FromJSON, ToJSON)
   deriving stock (Show, Generic)
 
@@ -64,14 +64,14 @@ newtype JwtToken = JwtToken { unJwtToken :: Text }
 --
 -- See examples in this module: 'encodeIntIdPayload', 'decodeIntIdPayload',
 -- 'encodeTextIdPayload', 'decodeTextIdPayload'.
-newtype JwtPayload a = JwtPayload { unJwtPayload :: a }
+newtype JwtPayload a = JwtPayload { getJwtPayload :: a }
   deriving newtype (Eq)
   deriving stock (Show, Functor)
 
 -- | Encodes 'JwtPayload' that stores 'Int' as payload with name @id@. Use it if
 -- you store ids as integer values. Dual to 'decodeIntIdPayload'.
 encodeIntIdPayload :: Integral a => JwtPayload a -> Jwt.ClaimsMap
-encodeIntIdPayload = payloadToMap . Json.Number . fromIntegral . unJwtPayload
+encodeIntIdPayload = payloadToMap . Json.Number . fromIntegral . getJwtPayload
 {-# INLINE encodeIntIdPayload #-}
 
 -- | Decodes 'JwtPayload' from 'Jwt.ClaimsMap' that stores 'Int' under name
@@ -88,7 +88,7 @@ decodeIntIdPayload = fmap JwtPayload . payloadFromMap
 -- | Encodes 'JwtPayload' that stores 'Text' as payload with name @id@. Use it if
 -- you store ids as text or UUID values. Dual to 'decodeTextIdPayload'.
 encodeTextIdPayload :: JwtPayload Text -> Jwt.ClaimsMap
-encodeTextIdPayload = payloadToMap . Json.String . unJwtPayload
+encodeTextIdPayload = payloadToMap . Json.String . getJwtPayload
 {-# INLINE encodeTextIdPayload #-}
 
 -- | Decodes 'JwtPayload' from 'Jwt.ClaimsMap' that stores 'Int' under name
