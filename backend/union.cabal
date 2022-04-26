@@ -43,12 +43,15 @@ library
       Core.Time
       Service.Twilio
       Union
-      Union.API
       Union.Account.Schema
+      Union.Account.Server
+      Union.Account.Service
+      Union.Account.Types
       Union.App.Configuration
       Union.App.Db
       Union.App.Env
       Union.App.Error
+      Union.Server
   other-modules:
       Paths_union
   autogen-modules:
@@ -130,6 +133,7 @@ library
     , pretty-simple
     , prometheus-client
     , random
+    , regex-compat
     , rel8
     , relude >=1.0
     , req

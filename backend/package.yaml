@@ -148,6 +148,7 @@ library:
 
     # text
     - base64-bytestring
+    - regex-compat
     - text
 
     # monitoring

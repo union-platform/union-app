@@ -6,6 +6,7 @@
 module Core.Sender
   ( -- * Credentials
     Phone(..)
+  , isPhoneValid
   , SenderAccount(..)
   , AuthToken(..)
 
@@ -19,6 +20,7 @@ import Relude
 import Core.Random (mkRandomDigits)
 import Data.Aeson (FromJSON, ToJSON)
 import Rel8 (DBEq, DBType)
+import Text.Regex (matchRegex, mkRegex)
 
 
 -- | Phone number. We assume that number is stored in international format with
@@ -26,6 +28,12 @@ import Rel8 (DBEq, DBType)
 newtype Phone = Phone { getPhone :: Text }
   deriving stock Generic
   deriving newtype (Show, Eq, ToJSON, FromJSON, DBType, DBEq)
+
+-- | Simple 'Phone' validation.
+isPhoneValid :: Phone -> Bool
+isPhoneValid phone = isJust . matchRegex r . toString $ getPhone phone
+  where r = mkRegex "^(\\+).([0-9]){10,16}$"
+{-# INLINE isPhoneValid #-}
 
 -- | Represents sender service Account.
 newtype SenderAccount = SenderAccount { unSenderAccount :: Text }

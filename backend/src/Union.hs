@@ -10,17 +10,16 @@ module Union
 import Relude
 
 import Network.Wai.Handler.Warp (run)
-import Servant.Server (serve)
 
 import qualified Core
 
 import Core.Json (packJson)
 import Core.Logging (logInfo)
 
-import Union.API (API)
 import Union.App.Configuration (Config(..))
 import Union.App.Db (initDb)
 import Union.App.Env (runWithEnv)
+import Union.Server (application)
 
 
 -- | Union entrypoint.
@@ -29,4 +28,4 @@ union configPath = runWithEnv configPath $ do
   config@Config {..} <- Core.grab @Config
   logInfo $ "Starting application with configuration: \n" <> packJson config
   initDb cDatabase
-  liftIO $ run cAppPort . serve (Proxy @API) $ pure config
+  ask >>= liftIO . run cAppPort . application
