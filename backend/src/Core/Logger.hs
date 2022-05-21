@@ -21,7 +21,8 @@ import Relude
 
 import qualified Colog (LoggerT, Message, WithLog)
 
-import Colog hiding (LoggerT, Message, WithLog)
+import Colog
+  hiding (LoggerT, Message, WithLog, logTextStdout, richMessageAction)
 import Data.Aeson (FromJSON(..), ToJSON(..), genericToJSON, withText)
 
 import Core.Json (jsonSumTypeOptions)
@@ -53,6 +54,20 @@ emptyLogger :: Applicative m => Logger m
 emptyLogger = LogAction $ const pass
 {-# INLINE emptyLogger #-}
 
+-- | Action that constructs 'RichMessage' and prints formatted 'Log' for it
+-- to 'stdout'.
+richMessageAction :: MonadIO m => Logger m
+richMessageAction = upgradeMessageAction defaultFieldMap
+  $ cmapM fmtRichMessageDefault logTextStdout
+{-# INLINE richMessageAction #-}
+{-# SPECIALIZE richMessageAction :: Logger IO #-}
+
+-- | Action to log 'Text' to stdout.
+-- Note: we append newline before printing to fix concurrent issues.
+logTextStdout :: MonadIO m => LogAction m Text
+logTextStdout = LogAction $ \m -> putText $ m <> "\n"
+{-# INLINE logTextStdout #-}
+{-# SPECIALIZE logTextStdout :: LogAction IO Text #-}
 
 deriving stock instance Generic Severity
 
