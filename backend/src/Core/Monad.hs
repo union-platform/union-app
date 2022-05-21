@@ -25,7 +25,7 @@ import Control.Monad.IO.Unlift (MonadUnliftIO(..))
 import Prometheus (MonadMonitor(..))
 
 import Core.Error (AppException(..), ErrorWithSource(..), toLogMsg)
-import Core.Logger (Log, WithLog, logMsg)
+import Core.Logger (WithLog, logMsg)
 
 
 -- | Main application monad. It has the following type variables:
@@ -79,7 +79,7 @@ runAppIO env = firstF getAppException . try . runApp env
 
 -- | Like 'runAppIO' but also logs error.
 runAppLogIO
-  :: (Show err, Typeable err, WithLog env Log (App err env))
+  :: (Show err, Typeable err, WithLog env (App err env))
   => env
   -> App err env a
   -> IO (Either (ErrorWithSource err) a)

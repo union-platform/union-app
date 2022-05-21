@@ -33,7 +33,7 @@ import System.Process (readProcess)
 import qualified Core
 
 import Core.Jwt (JwtSecret(..))
-import Core.Logger (LogAction(..))
+import Core.Logger (emptyLogger)
 import Core.Monad (runApp)
 import Core.Sender (AuthToken(..), SenderAccount(..))
 import Union.App.Configuration
@@ -56,9 +56,9 @@ mockEnv = do
   let
     eConfig = cfg { cDatabase = (cDatabase cfg) { dcCredentials = toText db } }
   let DatabaseConfig {..} = cDatabase eConfig
-  let eLogger             = LogAction $ const pass
+  let eLogger             = emptyLogger
   let eJwtSecret          = JwtSecret "0123456789"
-  let eSenderService      = (SenderAccount "0123456789", AuthToken "0123456789")
+  let eSenderService = (SenderAccount "0123456789", AuthToken "0123456789")
   Core.withDb dcPoolSize dcTimeout dcCredentials $ \eDbPool -> pure Env { .. }
 
 -- | 'MockApp' runner.
