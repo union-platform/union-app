@@ -14,7 +14,7 @@ import Network.Wai.Handler.Warp (run)
 import qualified Core
 
 import Core.Json (packJson)
-import Core.Logging (logInfo)
+import Core.Logger (logInfo)
 
 import Union.App.Configuration (Config(..))
 import Union.App.Db (initDb)

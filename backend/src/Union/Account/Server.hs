@@ -18,7 +18,7 @@ import Servant.API
 import Servant.API.Generic ((:-), ToServantApi)
 
 import Core.Error (throwError)
-import Core.Logging (Severity(..), logDebug, logInfo)
+import Core.Logger (Severity(..), logDebug, logInfo)
 import Core.Sender (isPhoneValid)
 
 import Union.Account.Schema (ConfirmationScope(..), UserAgent)

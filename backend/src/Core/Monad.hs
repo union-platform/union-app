@@ -25,7 +25,7 @@ import Control.Monad.IO.Unlift (MonadUnliftIO(..))
 import Prometheus (MonadMonitor(..))
 
 import Core.Error (AppException(..), ErrorWithSource(..), toLogMsg)
-import Core.Logging (Log, WithLog, logMsg)
+import Core.Logger (Log, WithLog, logMsg)
 
 
 -- | Main application monad. It has the following type variables:

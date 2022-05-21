@@ -5,7 +5,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 -- | This module provides logging ability. Currently it only reexports @co-log@.
-module Core.Logging
+module Core.Logger
   ( Log
   , setLogger
 

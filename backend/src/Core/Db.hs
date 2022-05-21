@@ -45,7 +45,7 @@ import Rel8 (DBEq, DBNum, DBType)
 
 import Core.Error (WithError, liftError)
 import Core.Has (Has, grab)
-import Core.Logging (Severity(Error))
+import Core.Logger (Severity(Error))
 
 
 -- | Constraint for monadic actions that wants access to database.

@@ -34,7 +34,7 @@ library
       Core.Has
       Core.Json
       Core.Jwt
-      Core.Logging
+      Core.Logger
       Core.Measure
       Core.Monad
       Core.Random

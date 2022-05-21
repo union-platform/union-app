@@ -33,7 +33,7 @@ import qualified Service.Twilio as Twilio
 import Core.Db (DbPool)
 import Core.Has (Has)
 import Core.Jwt (JwtPayload, JwtSecret(..), JwtToken, MonadJwt)
-import Core.Logging (Log, LogAction, Severity(..), logError, logException)
+import Core.Logger (Log, LogAction, Severity(..), logError, logException)
 import Core.Sender
   (AuthToken, ConfirmationCode, MonadSender(..), Phone, SenderAccount)
 import Core.Time (Seconds)

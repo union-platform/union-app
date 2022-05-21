@@ -33,7 +33,7 @@ import System.Process (readProcess)
 import qualified Core
 
 import Core.Jwt (JwtSecret(..))
-import Core.Logging (LogAction(..))
+import Core.Logger (LogAction(..))
 import Core.Monad (runApp)
 import Core.Sender (AuthToken(..), SenderAccount(..))
 import Union.App.Configuration

@@ -26,7 +26,7 @@ import Rel8 (DBNum, Expr, Query, Serializable, exists, limit, select)
 
 import Core.Db (migrate, runStatement, runTransaction)
 import Core.Error (ErrorWithSource, catchError, showErr, toAppError)
-import Core.Logging (logInfo)
+import Core.Logger (logInfo)
 
 import Union.App.Configuration (DatabaseConfig(..))
 import Union.App.Env (WithDb, WithError, WithLog, kill)
