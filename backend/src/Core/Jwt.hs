@@ -37,6 +37,7 @@ import qualified Data.Map as Map
 import qualified Web.JWT as Jwt
 
 import Data.Aeson (FromJSON, ToJSON, Value)
+import Data.OpenApi (ToParamSchema, ToSchema)
 import Data.Scientific (toBoundedInteger)
 import Data.Time.Clock.POSIX (getPOSIXTime)
 import Web.HttpApiData (FromHttpApiData)
@@ -50,12 +51,13 @@ import Core.Time (Seconds(..))
 -- @
 -- jwtSecret <- 'JwtSecret' \<$\> mkRandomString 10
 -- @
-newtype JwtSecret = JwtSecret { unJwtSecret :: Text }
+newtype JwtSecret = JwtSecret { getJwtSecret :: Text }
 
 -- | Encoded JSON web token.
-newtype JwtToken = JwtToken { unJwtToken :: Text }
-  deriving newtype (Eq, Ord, Hashable, FromHttpApiData, FromJSON, ToJSON)
+newtype JwtToken = JwtToken { getJwtToken :: Text }
   deriving stock (Show, Generic)
+  deriving newtype (Eq, Ord, Hashable)
+  deriving newtype (FromHttpApiData, FromJSON, ToJSON, ToParamSchema, ToSchema)
 
 -- | Stores arbitrary payload. If you want to store your custom payload, you
 -- need to specify two functions:
@@ -64,19 +66,20 @@ newtype JwtToken = JwtToken { unJwtToken :: Text }
 --
 -- See examples in this module: 'encodeIntIdPayload', 'decodeIntIdPayload',
 -- 'encodeTextIdPayload', 'decodeTextIdPayload'.
-newtype JwtPayload a = JwtPayload { unJwtPayload :: a }
-  deriving newtype (Eq)
+newtype JwtPayload a = JwtPayload { getJwtPayload :: a }
   deriving stock (Show, Functor)
+  deriving newtype (Eq)
 
 -- | Encodes 'JwtPayload' that stores 'Int' as payload with name @id@. Use it if
 -- you store ids as integer values. Dual to 'decodeIntIdPayload'.
-encodeIntIdPayload :: JwtPayload Int -> Jwt.ClaimsMap
-encodeIntIdPayload = payloadToMap . Json.Number . fromIntegral . unJwtPayload
+encodeIntIdPayload :: Integral a => JwtPayload a -> Jwt.ClaimsMap
+encodeIntIdPayload = payloadToMap . Json.Number . fromIntegral . getJwtPayload
 {-# INLINE encodeIntIdPayload #-}
 
 -- | Decodes 'JwtPayload' from 'Jwt.ClaimsMap' that stores 'Int' under name
 -- @id@. Dual to 'encodeIntIdPayload'.
-decodeIntIdPayload :: Jwt.ClaimsMap -> Maybe (JwtPayload Int)
+decodeIntIdPayload
+  :: (Integral a, Bounded a) => Jwt.ClaimsMap -> Maybe (JwtPayload a)
 decodeIntIdPayload = fmap JwtPayload . payloadFromMap
   (\case
     Json.Number jwtId -> toBoundedInteger jwtId
@@ -87,7 +90,7 @@ decodeIntIdPayload = fmap JwtPayload . payloadFromMap
 -- | Encodes 'JwtPayload' that stores 'Text' as payload with name @id@. Use it if
 -- you store ids as text or UUID values. Dual to 'decodeTextIdPayload'.
 encodeTextIdPayload :: JwtPayload Text -> Jwt.ClaimsMap
-encodeTextIdPayload = payloadToMap . Json.String . unJwtPayload
+encodeTextIdPayload = payloadToMap . Json.String . getJwtPayload
 {-# INLINE encodeTextIdPayload #-}
 
 -- | Decodes 'JwtPayload' from 'Jwt.ClaimsMap' that stores 'Int' under name

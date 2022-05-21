@@ -25,12 +25,13 @@ import Core.Jwt
   , encodeTextIdPayload
   )
 import Core.Time (Seconds(..))
+import Union.App.Env (Env)
 
 import Test.Gen (genInt, genSeconds, genText)
-import Test.Mock (MockEnv, runMockApp)
+import Test.Mock (runMockApp)
 
 
-jwtTests :: MockEnv -> TestTree
+jwtTests :: Env -> TestTree
 jwtTests env = testGroup
   "JWT roundtrip properties"
   [ testProperty "fromJwtMap . toJwtMap @Int  ≡ Just"
@@ -53,7 +54,7 @@ jwtRoundtrip gen encode decode = property $ do
   randomPayload <- JwtPayload <$> forAll gen
   tripping randomPayload encode decode
 
-createAndVerifyJwt :: MockEnv -> Property
+createAndVerifyJwt :: Env -> Property
 createAndVerifyJwt env = property . hoist (runMockApp env) $ do
   seconds         <- forAll genSeconds
   payload         <- forAll genPayload

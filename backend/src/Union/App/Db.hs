@@ -45,16 +45,16 @@ executeT = runDb . runTransaction
 
 -- | Helper to select one record.
 selectOne
-  :: forall m exprs a
-   . (WithDb m, WithError m, Serializable exprs a)
+  :: forall exprs a
+   . (Serializable exprs a)
   => Query exprs
-  -> m (Maybe a)
-selectOne = fmap listToMaybe . executeS . select . limit 1
+  -> Statement () (Maybe a)
+selectOne = fmap listToMaybe . select . limit 1
 {-# INLINE selectOne #-}
 
 -- | Helper to check existence.
-selectExists :: (WithDb m, WithError m) => Query exprs -> m Bool
-selectExists = fmap (all (== True)) . executeS . select . exists
+selectExists :: Query exprs -> Statement () Bool
+selectExists = fmap (all (== True)) . select . exists
 {-# INLINE selectExists #-}
 
 -- | Helper to generate next serial id by given field name.

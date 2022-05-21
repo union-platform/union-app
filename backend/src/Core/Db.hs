@@ -11,7 +11,7 @@ module Core.Db
   , withPool
 
     -- * Accessing DB
-  , toTransaction
+  , Id(..)
   , runTransaction
   , runStatement
 
@@ -40,8 +40,8 @@ import Hasql.Pool (UsageError)
 import Hasql.Session (Session)
 import Hasql.Statement (Statement)
 import Hasql.Transaction (Transaction, sql, statement)
-import Hasql.Transaction.Sessions
-  (IsolationLevel(Serializable), Mode(Write), transaction)
+import Hasql.Transaction.Sessions (IsolationLevel(..), Mode(..), transaction)
+import Rel8 (DBEq, DBNum, DBType)
 
 import Core.Error (WithError, liftError)
 import Core.Has (Has, grab)
@@ -78,10 +78,10 @@ withPool action = do
 {-# INLINE withPool #-}
 
 
--- | Creates 'Transaction' from 'Statement.
-toTransaction :: Statement () a -> Transaction a
-toTransaction = statement ()
-{-# INLINE toTransaction #-}
+-- | Type to represent id in database.
+newtype Id a = Id { getId :: Int64 }
+  deriving stock Generic
+  deriving newtype (Show, Eq, DBType, DBEq, DBNum)
 
 -- | Runs 'Transaction' with 'DbPool'.
 runTransaction
@@ -92,7 +92,7 @@ runTransaction =
 
 -- | Runs 'Statement' as 'Transaction'.
 runStatement :: (WithDb env m, WithError UsageError m) => Statement () a -> m a
-runStatement = withFrozenCallStack (runTransaction . toTransaction)
+runStatement = withFrozenCallStack (runTransaction . statement ())
 {-# INLINE runStatement #-}
 
 

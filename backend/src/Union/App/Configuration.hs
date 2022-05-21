@@ -7,8 +7,8 @@ module Union.App.Configuration
   ( defaultConfig
 
     -- * Configuration types
-  , DatabaseConfig(..)
   , Config(..)
+  , DatabaseConfig(..)
 
     -- * Tools
   , loadConfig
@@ -22,8 +22,10 @@ import Data.Yaml.Config (loadYamlSettings, useEnv)
 import Deriving.Aeson (CustomJSON(..))
 import Network.Wai.Handler.Warp (Port)
 
-import Core.Json (JsonDataOptions)
+import Core.Json (JsonCamelCase)
 import Core.Logging (Severity(..))
+import Core.Sender (Phone(..))
+import Core.Time (Seconds(..))
 
 
 -- | Database configuration.
@@ -39,19 +41,23 @@ data DatabaseConfig = DatabaseConfig
     -- ^ Path to migrations folder.
   }
   deriving stock (Generic, Eq, Show)
-  deriving (FromJSON, ToJSON) via CustomJSON (JsonDataOptions "dc") DatabaseConfig
+  deriving (FromJSON, ToJSON) via CustomJSON (JsonCamelCase "dc") DatabaseConfig
 
 -- | Union configuration.
 data Config = Config
-  { cAppPort  :: !Port
+  { cAppPort     :: !Port
     -- ^ Application web port.
-  , cDatabase :: !DatabaseConfig
+  , cDatabase    :: !DatabaseConfig
     -- ^ Database configuration.
-  , cSeverity :: !Severity
+  , cSeverity    :: !Severity
     -- ^ Logging severity.
+  , cJwtExpire   :: !Seconds
+    -- ^ How many seconds JWT will be valid.
+  , cSenderPhone :: !(Maybe Phone)
+    -- ^ Phone number for sender service.
   }
   deriving stock (Generic, Eq, Show)
-  deriving (FromJSON, ToJSON) via CustomJSON (JsonDataOptions "c") Config
+  deriving (FromJSON, ToJSON) via CustomJSON (JsonCamelCase "c") Config
 
 -- | Helper to load config from yaml file.
 loadConfig :: FromJSON settings => FilePath -> IO settings
@@ -60,12 +66,14 @@ loadConfig path = loadYamlSettings [path] [] useEnv
 -- | Default Union config.
 defaultConfig :: Config
 defaultConfig = Config
-  { cAppPort  = 8080
-  , cDatabase = DatabaseConfig
+  { cAppPort     = 8080
+  , cDatabase    = DatabaseConfig
     { dcPoolSize    = 100
     , dcTimeout     = 5
     , dcCredentials = "host=localhost port=5432 user=union dbname=union"
     , dcMigrations  = "./migrations"
     }
-  , cSeverity = Info
+  , cSeverity    = Info
+  , cJwtExpire   = Seconds 86400
+  , cSenderPhone = Nothing
   }

@@ -8,6 +8,11 @@
 
 ...
 
+## Documentation [↑](#union)
+
+Union serves Swagger UI with API documentation, to see it - launch backend
+instance and go to `/docs`.
+
 ## Migrations [↑](#union)
 
 Union server applies all migrations at startup; migrations:

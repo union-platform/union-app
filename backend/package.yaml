@@ -137,14 +137,20 @@ library:
     - containers
     - directory
     - filepath
+    - lens
     - mtl
     - random
     - safe-exceptions
     - scientific
-    - text
     - time
+    - unliftio
     - unliftio-core
     - unordered-containers
+
+    # text
+    - base64-bytestring
+    - regex-compat
+    - text
 
     # monitoring
     - ekg-core
@@ -166,8 +172,11 @@ library:
     - jwt
     - network
     - openapi3
+    - req
     - servant
+    - servant-openapi3
     - servant-server
+    - servant-swagger-ui
     - wai
     - warp
 
@@ -218,10 +227,23 @@ tests:
     dependencies:
       - union
 
-      - tasty
       - hedgehog
+      - hspec
+      - QuickCheck
+      - quickcheck-instances
+      - tasty
       - tasty-hedgehog
+      - tasty-hspec
+      - tasty-hunit
 
+      - http-client
+      - http-types
       - jwt
       - mmorph
       - process
+      - rel8
+      - servant-client
+      - servant-client-core
+      - servant-openapi3
+      - servant-server
+      - warp

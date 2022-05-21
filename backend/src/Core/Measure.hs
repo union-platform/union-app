@@ -18,6 +18,7 @@ module Core.Measure
   ) where
 
 import Relude
+import Relude.Extra.CallStack (ownName)
 
 import qualified Data.HashMap.Strict as HashMap
 import qualified Data.Map as Map
@@ -33,7 +34,6 @@ import Prometheus
   , observe
   , register
   )
-import Relude.Extra.CallStack (ownName)
 import System.CPUTime (getCPUTime)
 import System.Metrics.Distribution (Distribution)
 

@@ -1,11 +1,12 @@
 # SPDX-FileCopyrightText: 2022 Union
 #
-# SPDX-License-Identifier: CC0-1.0
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 appPort: 8888
 database:
   poolSize: 20
   timeout: 5
   credentials: ""
-  migrations: "../migrations"
+  migrations: "./migrations"
 severity: error
+jwtExpire: 5

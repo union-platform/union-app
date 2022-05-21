@@ -1,4 +1,4 @@
--- SPDX-FileCopyrightText: 2021 Union
+-- SPDX-FileCopyrightText: 2021-2022 Union
 --
 -- SPDX-License-Identifier: MPL-2.0
 
@@ -6,15 +6,18 @@
 
 -- | Helper functions to write @swagger@ instances easier.
 module Core.Swagger
-  ( schemaRef
+  ( WithSwagger
+  , schemaRef
   , namedSchema
   , declareSingleFieldSchema
+  , genericNamedSchema
   ) where
 
 import Relude
 import Relude.Extra.Lens ((.~))
 import Relude.Extra.Type (typeName)
 
+import Data.Foldable (foldl)
 import Data.OpenApi
   ( Definitions
   , HasType(type_)
@@ -24,11 +27,21 @@ import Data.OpenApi
   , Schema
   , ToSchema
   , declareSchemaRef
+  , fromAesonOptions
+  , genericDeclareNamedSchema
   , properties
   , required
   )
-import Data.OpenApi.Declare (Declare)
+import Data.OpenApi.Declare (Declare, DeclareT)
+import Data.OpenApi.Internal.Schema (GToSchema)
+import Deriving.Aeson (AesonOptions(aesonOptions))
+import GHC.Generics (Rep)
+import Servant.API (type (:<|>))
+import Servant.Swagger.UI (SwaggerSchemaUI)
 
+
+-- | Attach a swagger UI to the given @api@.
+type WithSwagger url api = api :<|> SwaggerSchemaUI url "swagger.json"
 
 -- | Shorter version of 'declareSchemaRef'. So instead of
 -- @
@@ -45,7 +58,7 @@ schemaRef = declareSchemaRef (Proxy @t)
 -- | Helper function to return named schemas. So instead of:
 -- @
 -- pure $ 'NamedSchema' (Just \"LoginResponse\") $ 'mempty'
---   & type_ .~ SwaggerObject
+--   & type_ .~ OpenApiObject
 --   & properties .~ fromList
 --       [("jwtToken", jwtTokenSchema)]
 --   & required .~ ["jwtToken"]
@@ -82,3 +95,18 @@ declareSingleFieldSchema fieldName _ = do
       .~ fromList [(fieldName, fieldsSchema)]
       &  required
       .~ [fieldName]
+
+-- | Helper function to declare 'NamedSchema' using derived JSON instances by
+-- @Core.Json@ module.
+genericNamedSchema
+  :: forall j t
+   . (AesonOptions j, Generic t, Typeable t, GToSchema (Rep t))
+  => [  DeclareT (Definitions Schema) Identity NamedSchema
+     -> DeclareT (Definitions Schema) Identity NamedSchema
+     ]
+  -> Proxy t
+  -> Declare (Definitions Schema) NamedSchema
+genericNamedSchema extra proxy = foldl (&) schema extra
+  where
+    schema =
+      genericDeclareNamedSchema (fromAesonOptions $ aesonOptions @j) proxy

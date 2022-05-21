@@ -22,12 +22,13 @@ import Relude
 
 import qualified Control.Concurrent as C (threadDelay)
 
+import Data.Aeson (FromJSON, ToJSON)
 import Data.Time.Clock (UTCTime(..), diffUTCTime)
 
 
 -- | Represents the amount of seconds.
 newtype Seconds = Seconds { getSeconds :: Int }
-  deriving newtype (Show, Eq)
+  deriving newtype (Show, Eq, FromJSON, ToJSON)
 
 -- | Similar to 'C.threadDelay' but receives 'Seconds' instead of 'Int'.
 threadDelay :: MonadIO m => Seconds -> m ()
