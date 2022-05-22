@@ -151,6 +151,7 @@ library
     , unliftio-core
     , unordered-containers
     , wai
+    , wai-extra
     , warp
     , yaml
   if impl(ghc >= 8.10.0)

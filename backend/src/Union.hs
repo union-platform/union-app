@@ -9,7 +9,6 @@ module Union
 
 import Relude
 
-import Network.Wai (Middleware)
 import Network.Wai.Handler.Warp (run)
 
 import qualified Core
@@ -20,7 +19,7 @@ import Core.Logger (logInfo)
 import Union.App.Configuration (Config(..))
 import Union.App.Db (initDb)
 import Union.App.Env (runWithEnv)
-import Union.Middleware (applyMiddleware)
+import Union.Middleware (applyMiddleware, loggingMiddleware)
 import Union.Server (application)
 
 
@@ -30,8 +29,6 @@ union configPath = runWithEnv configPath $ do
   config@Config {..} <- Core.grab @Config
   logInfo $ "Starting application with configuration: \n" <> packJson config
   initDb cDatabase
+  let middleware = [loggingMiddleware cSeverity]
   ask >>= liftIO . run cAppPort . applyMiddleware middleware . application
 
--- | List of Union middleware. Execution is in order (see 'applyMiddleware').
-middleware :: [Middleware]
-middleware = []
