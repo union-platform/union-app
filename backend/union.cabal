@@ -51,6 +51,7 @@ library
       Union.App.Db
       Union.App.Env
       Union.App.Error
+      Union.Middleware
       Union.Server
   other-modules:
       Paths_union
