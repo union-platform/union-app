@@ -23,7 +23,7 @@ import Deriving.Aeson (CustomJSON(..))
 import Network.Wai.Handler.Warp (Port)
 
 import Core.Json (JsonCamelCase)
-import Core.Logging (Severity(..))
+import Core.Logger (Severity(..))
 import Core.Sender (Phone(..))
 import Core.Time (Seconds(..))
 

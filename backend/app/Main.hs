@@ -17,6 +17,7 @@ import Union (union)
 
 main :: IO ()
 main = withUtf8 $ do
+  hSetBuffering stdout LineBuffering
   Arguments {..} <- getArguments
   case aCommand of
     Run            -> union aConfig

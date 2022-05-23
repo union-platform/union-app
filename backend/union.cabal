@@ -34,7 +34,7 @@ library
       Core.Has
       Core.Json
       Core.Jwt
-      Core.Logging
+      Core.Logger
       Core.Measure
       Core.Monad
       Core.Random
@@ -51,6 +51,7 @@ library
       Union.App.Db
       Union.App.Env
       Union.App.Error
+      Union.Middleware
       Union.Server
   other-modules:
       Paths_union
@@ -150,6 +151,7 @@ library
     , unliftio-core
     , unordered-containers
     , wai
+    , wai-extra
     , warp
     , yaml
   if impl(ghc >= 8.10.0)

@@ -26,7 +26,7 @@ import qualified Core
 import Core.Db (Id, getId)
 import Core.Error (throwError)
 import Core.Jwt (JwtPayload(..), JwtToken)
-import Core.Logging (Severity(..), logDebug)
+import Core.Logger (Severity(..), logDebug)
 import Core.Sender (ConfirmationCode, Phone)
 
 import Union.Account.Schema

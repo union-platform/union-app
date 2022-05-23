@@ -33,7 +33,7 @@ import qualified Service.Twilio as Twilio
 import Core.Db (DbPool)
 import Core.Has (Has)
 import Core.Jwt (JwtPayload, JwtSecret(..), JwtToken, MonadJwt)
-import Core.Logging (Log, LogAction, Severity(..), logError, logException)
+import Core.Logger (Log, Logger, Severity(..), logError, logException)
 import Core.Sender
   (AuthToken, ConfirmationCode, MonadSender(..), Phone, SenderAccount)
 import Core.Time (Seconds)
@@ -53,7 +53,7 @@ type Union = AsServerT App
 type WithDb m = Core.WithDb Env m
 
 -- | Constraint to actions with logging.
-type WithLog m = Core.WithLog Env Log m
+type WithLog m = Core.WithLog Env m
 
 -- | Constraint to actions that can throw and catch pure errors with call-stack.
 type WithError m = Core.WithError Error m
@@ -72,7 +72,7 @@ type EnvField f = Core.Field f Env
 data Env = Env
   { eConfig        :: !Config
   , eDbPool        :: !DbPool
-  , eLogger        :: !(LogAction App Log)
+  , eLogger        :: !(Logger App)
   , eJwtSecret     :: !JwtSecret
   , eSenderService :: !(SenderAccount, AuthToken)
     -- ^ Stores Twilio account and auth token.
@@ -82,14 +82,14 @@ data Env = Env
   deriving (Has JwtSecret)                  via EnvField "eJwtSecret"
   deriving (Has (SenderAccount, AuthToken)) via EnvField "eSenderService"
 
--- | Instance to specify how to get and update the 'LogAction' stored inside
+-- | Instance to specify how to get and update the 'Logger' stored inside
 -- the 'Env'.
 instance Core.HasLog Env Log App where
-  getLogAction :: Env -> LogAction App Log
+  getLogAction :: Env -> Logger App
   getLogAction = eLogger
   {-# INLINE getLogAction #-}
 
-  setLogAction :: LogAction App Log -> Env -> Env
+  setLogAction :: Logger App -> Env -> Env
   setLogAction newLogAction env = env { eLogger = newLogAction }
   {-# INLINE setLogAction #-}
 

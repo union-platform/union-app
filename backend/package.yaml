@@ -178,6 +178,7 @@ library:
     - servant-server
     - servant-swagger-ui
     - wai
+    - wai-extra
     - warp
 
     # other

@@ -34,7 +34,7 @@ import Control.Monad.Except (MonadError)
 import GHC.Stack.Types (CallStack(EmptyCallStack))
 import Text.Pretty.Simple (pShow)
 
-import Core.Logging (Msg(..), Severity)
+import Core.Logger (Msg(..), Severity)
 
 
 -- | Type alias for errors that has access to 'CallStack'.
