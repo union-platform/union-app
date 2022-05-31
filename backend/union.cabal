@@ -115,6 +115,7 @@ library
     , case-insensitive
     , co-log
     , containers
+    , data-default
     , deriving-aeson
     , directory
     , ekg-core
@@ -287,6 +288,7 @@ test-suite union-tests
   build-depends:
       QuickCheck
     , base >=4.10 && <5
+    , data-default
     , hedgehog
     , hspec
     , http-client

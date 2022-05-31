@@ -15,6 +15,7 @@ module Test.Mock
 import Relude
 
 import Control.Exception (throwIO)
+import Data.Default (def)
 import Network.HTTP.Client (defaultManagerSettings, newManager)
 import Network.HTTP.Types (Status)
 import Network.Wai.Handler.Warp (testWithApplication)
@@ -36,8 +37,7 @@ import Core.Jwt (JwtSecret(..))
 import Core.Logger (emptyLogger)
 import Core.Monad (runApp)
 import Core.Sender (AuthToken(..), SenderAccount(..))
-import Union.App.Configuration
-  (Config(..), DatabaseConfig(..), defaultConfig, loadConfig)
+import Union.App.Configuration (Config(..), DatabaseConfig(..), loadConfig)
 import Union.App.Db (runDb)
 import Union.App.Env (Env(..))
 import Union.App.Error (Error)
@@ -51,7 +51,7 @@ type MockApp = Core.App Error Env
 -- separate script.
 mockEnv :: IO Env
 mockEnv = do
-  cfg <- maybe (pure defaultConfig) loadConfig (Just "./tests/config.yaml")
+  cfg <- maybe (pure def) loadConfig (Just "./tests/config.yaml")
   db  <- readProcess "sh" ["-c", "./tests/setup-db.sh"] []
   let
     eConfig = cfg { cDatabase = (cDatabase cfg) { dcCredentials = toText db } }

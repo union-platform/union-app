@@ -23,6 +23,7 @@ module Union.App.Env
 
 import Relude
 
+import Data.Default (def)
 import Network.HTTP.Req (HttpException(..))
 import Servant.Server.Generic (AsServerT)
 import UnliftIO.Exception (catch)
@@ -38,8 +39,7 @@ import Core.Sender
   (AuthToken, ConfirmationCode, MonadSender(..), Phone, SenderAccount)
 import Core.Time (Seconds)
 
-import Union.App.Configuration
-  (Config(..), DatabaseConfig(..), defaultConfig, loadConfig)
+import Union.App.Configuration (Config(..), DatabaseConfig(..), loadConfig)
 import Union.App.Error (Error(..))
 
 
@@ -126,7 +126,7 @@ instance MonadSender App where
 -- | Create Union 'Env' with given path to 'Config'.
 buildEnv :: Maybe FilePath -> IO Env
 buildEnv path = do
-  eConfig <- maybe (pure defaultConfig) loadConfig path
+  eConfig <- maybe (pure def) loadConfig path
   let DatabaseConfig {..} = cDatabase eConfig
   let eLogger             = Core.setLogger $ cSeverity eConfig
   eJwtSecret    <- JwtSecret <$> Core.mkRandomString 10
