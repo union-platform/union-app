@@ -33,6 +33,7 @@ import System.Process (readProcess)
 
 import qualified Core
 
+import Core.Db (DbCredentials(..))
 import Core.Jwt (JwtSecret(..))
 import Core.Logger (emptyLogger)
 import Core.Monad (runApp)
@@ -47,14 +48,17 @@ import Union.Server (api, server)
 -- | Mock monad.
 type MockApp = Core.App Error Env
 
+-- | Helper to generate temporary DB connection string.
+generateTempDb :: IO String
+generateTempDb = readProcess "sh" ["-c", "./tests/setup-db.sh"] []
+
 -- | Create Union 'Env' from test config, but with temp db, created by
 -- separate script.
 mockEnv :: IO Env
 mockEnv = do
   cfg <- maybe (pure def) loadConfig (Just "./tests/config.yaml")
-  db  <- readProcess "sh" ["-c", "./tests/setup-db.sh"] []
-  let
-    eConfig = cfg { cDatabase = (cDatabase cfg) { dcCredentials = toText db } }
+  db  <- DbCredentials . toText <$> generateTempDb
+  let eConfig = cfg { cDatabase = (cDatabase cfg) { dcCredentials = db } }
   let DatabaseConfig {..} = cDatabase eConfig
   let eLogger             = emptyLogger
   let eJwtSecret          = JwtSecret "0123456789"

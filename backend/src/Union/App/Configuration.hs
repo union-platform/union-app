@@ -17,10 +17,11 @@ import Relude
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Default (Default(..))
 import Data.Time.Clock (NominalDiffTime)
-import Data.Yaml.Config (loadYamlSettings, useEnv)
+import Data.Yaml.Config (ignoreEnv, loadYamlSettings)
 import Deriving.Aeson (CustomJSON(..))
 import Network.Wai.Handler.Warp (Port)
 
+import Core.Db (DbCredentials(..))
 import Core.Json (JsonCamelCase)
 import Core.Logger (Severity(..))
 import Core.Sender (Phone(..))
@@ -34,7 +35,7 @@ data DatabaseConfig = DatabaseConfig
   , dcTimeout     :: !NominalDiffTime
     -- ^ An amount of time for which an unused resource is kept open.
     -- The smallest acceptable value is 0.5 seconds.
-  , dcCredentials :: !Text
+  , dcCredentials :: !DbCredentials
     -- ^ Connection settings.
   , dcMigrations  :: !FilePath
     -- ^ Path to migrations folder.
@@ -65,7 +66,8 @@ instance Default Config where
     , cDatabase    = DatabaseConfig
       { dcPoolSize    = 100
       , dcTimeout     = 5
-      , dcCredentials = "host=localhost port=5432 user=union dbname=union"
+      , dcCredentials = DbCredentials
+        "host=localhost port=5432 user=union dbname=union"
       , dcMigrations  = "./migrations"
       }
     , cSeverity    = Info
@@ -75,4 +77,4 @@ instance Default Config where
 
 -- | Helper to load config from yaml file.
 loadConfig :: FromJSON settings => FilePath -> IO settings
-loadConfig path = loadYamlSettings [path] [] useEnv
+loadConfig path = loadYamlSettings [path] [] ignoreEnv

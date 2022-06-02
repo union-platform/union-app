@@ -5,7 +5,8 @@
 -- | Tools to work with DB.
 module Core.Db
   ( -- * Database pool
-    DbPool
+    DbCredentials(..)
+  , DbPool
   , WithDb
   , withDb
   , withPool
@@ -27,6 +28,7 @@ import Relude
 import qualified Hasql.Pool as Pool
 
 import Control.Exception.Safe (bracket)
+import Data.Aeson (FromJSON, ToJSON)
 import Data.Time.Clock (NominalDiffTime)
 import Hasql.Migration
   ( MigrationCommand(MigrationInitialization)
@@ -54,10 +56,18 @@ type WithDb env m = (MonadReader env m, Has DbPool env, MonadIO m)
 -- | Pool of PostgreSQL database connections.
 type DbPool = Pool.Pool
 
+-- | Represent PostgreSQL credentials.
+-- Each parameter setting is in the form keyword = value.
+-- Example: host=localhost port=5432 dbname=mydb connect_timeout=10
+-- see [documentation](https://www.postgresql.org/docs/13/libpq-connect.html#LIBPQ-CONNSTRING)
+newtype DbCredentials = DbCredentials { getDbCredentials :: Text}
+  deriving stock Generic
+  deriving newtype (Show, Eq, Semigroup, Monoid, ToJSON, FromJSON)
+
 -- | Create 'Pool.Pool'.
-createPool :: Int -> NominalDiffTime -> Text -> IO DbPool
+createPool :: Int -> NominalDiffTime -> DbCredentials -> IO DbPool
 createPool size timeout credentials =
-  Pool.acquire (size, timeout, encodeUtf8 credentials)
+  Pool.acquire (size, timeout, encodeUtf8 $ getDbCredentials credentials)
 {-# INLINE createPool #-}
 
 -- | Release 'Pool.Pool'.
@@ -66,7 +76,7 @@ destroyPool = Pool.release
 {-# INLINE destroyPool #-}
 
 -- | Helper to establish connection safely.
-withDb :: Int -> NominalDiffTime -> Text -> (DbPool -> IO a) -> IO a
+withDb :: Int -> NominalDiffTime -> DbCredentials -> (DbPool -> IO a) -> IO a
 withDb size timeout credentials =
   bracket (createPool size timeout credentials) destroyPool
 
