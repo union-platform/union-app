@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: "Set up HLint"
         uses: rwe/actions-hlint-setup@v1
@@ -37,15 +37,15 @@ jobs:
         working-directory: ./backend
 
     steps:
-      - uses: actions/checkout@v2
-      - uses: haskell/actions/setup@v1.2.9
+      - uses: actions/checkout@v3
+      - uses: haskell/actions/setup@v2
         with:
           ghc-version: "8.10.7"
           enable-stack: true
           stack-version: "latest"
 
       - name: Cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         env:
           cache-name: cache-stack
         with:
