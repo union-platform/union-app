@@ -1,0 +1,77 @@
+# SPDX-FileCopyrightText: 2022 Union
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+services:
+  database:
+    container_name: union-db
+    image: postgres:14
+    restart: unless-stopped
+    volumes:
+      - union-database-data:/var/lib/postgresql/data/
+    networks:
+      - union-network
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    container_name: union-server
+    image: "ghcr.io/union-platform/union-server:latest"
+    # uncomment this if you want to build image by yourself
+    # build:
+    #   context: ../
+    #   dockerfile: ./docker/Dockerfile-backend
+    restart: unless-stopped
+    configs:
+      - source: union-backend-config
+        target: /config.yaml
+    networks:
+      - union-network
+    expose:
+      - 8080
+    env_file:
+      - .env
+    environment:
+      - UNION_DB_HOST=union-db
+      - UNION_DB_USER=${POSTGRES_USER}
+      - UNION_DB_PASSWORD=${POSTGRES_PASSWORD}
+      - UNION_DB_NAME=${POSTGRES_DB}
+      - UNION_TWILIO_AUTH_TOKEN=${UNION_TWILIO_AUTH_TOKEN}
+      - UNION_TWILIO_SENDER_ACCOUNT=${UNION_TWILIO_SENDER_ACCOUNT}
+    depends_on:
+      database:
+        condition: service_healthy
+    links:
+      - database
+  #
+  # frontend:
+  #   container_name: union-frontend
+  #   image: "ghcr.io/union-platform/union-frontend:latest"
+  #   restart: unless-stopped
+  #   networks:
+  #     - union-network
+  #   depends_on:
+  #     backend:
+  #       condition: service_started
+  #   links:
+  #     - backend
+
+configs:
+  union-backend-config:
+    file: ${UNION_CONFIG}
+
+volumes:
+  union-database-data:
+    external: true
+
+networks:
+  union-network: {}
