@@ -3,6 +3,31 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 services:
+  web:
+    container_name: union-web
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    configs:
+      - source: union-web-hosts
+        target: /etc/caddy/Caddyfile
+    volumes:
+      - union-web-config:/config
+      - union-web-data:/data
+      - union-web-certs:/srv
+    networks:
+      - union-network
+    depends_on:
+      backend:
+        condition: service_started
+      # frontend:
+      #   condition: service_started
+    links:
+      - backend
+      # - frontend
+
   database:
     container_name: union-db
     image: postgres:14
@@ -66,10 +91,18 @@ services:
   #     - backend
 
 configs:
+  union-web-hosts:
+    file: ${WEB_HOSTS}
   union-backend-config:
     file: ${UNION_CONFIG}
 
 volumes:
+  union-web-config:
+    external: true
+  union-web-data:
+    external: true
+  union-web-certs:
+    external: true
   union-database-data:
     external: true
 
