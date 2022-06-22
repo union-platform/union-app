@@ -135,17 +135,19 @@ library:
   dependencies:
     # haskell staff
     - containers
-    - directory
-    - filepath
+    - data-default
     - lens
     - mtl
-    - random
     - safe-exceptions
-    - scientific
-    - time
     - unliftio
     - unliftio-core
     - unordered-containers
+
+    # os
+    - directory
+    - filepath
+    - random
+    - time
 
     # text
     - base64-bytestring
@@ -186,6 +188,7 @@ library:
     - co-log
     - optparse-applicative
     - pretty-simple
+    - scientific
     - yaml
 
 executables:
@@ -237,6 +240,7 @@ tests:
       - tasty-hspec
       - tasty-hunit
 
+      - data-default
       - http-client
       - http-types
       - jwt

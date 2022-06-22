@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: 2022 Union
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+FROM haskell:8.10.7-slim AS builder
+
+WORKDIR /opt/union-server
+
+RUN stack update
+
+RUN apt update -y
+RUN apt install -y liblzma-dev postgresql-client libpq-dev
+
+# Add just the dependencies files to capture it
+COPY ./backend/stack.yaml /opt/union-server/
+COPY ./backend/stack.yaml.lock /opt/union-server/
+COPY ./backend/package.yaml /opt/union-server/
+
+# Docker will cache this command as a layer, freeing us up to modify source
+# code without re-installing dependencies (unless the .cabal file changes!)
+RUN stack build --only-dependencies -j4
+
+# Add and Install Application Code
+COPY ./backend/ /opt/union-server/
+RUN stack install
+
+
+FROM ubuntu:22.04
+
+RUN apt update -y
+RUN apt install -y liblzma-dev postgresql-client libpq-dev
+
+COPY --from=builder /root/.local/bin/union-server /usr/bin/
+COPY --from=builder /opt/union-server/migrations/ /migrations/
+
+ENTRYPOINT [ "union-server", "run" ]
+CMD ["-c", "./config.yaml"]

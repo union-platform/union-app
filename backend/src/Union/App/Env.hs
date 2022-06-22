@@ -23,6 +23,7 @@ module Union.App.Env
 
 import Relude
 
+import Data.Default (def)
 import Network.HTTP.Req (HttpException(..))
 import Servant.Server.Generic (AsServerT)
 import UnliftIO.Exception (catch)
@@ -30,7 +31,7 @@ import UnliftIO.Exception (catch)
 import qualified Core
 import qualified Service.Twilio as Twilio
 
-import Core.Db (DbPool)
+import Core.Db (DbCredentials(..), DbPool)
 import Core.Has (Has)
 import Core.Jwt (JwtPayload, JwtSecret(..), JwtToken, MonadJwt)
 import Core.Logger (Log, Logger, Severity(..), logError, logException)
@@ -38,8 +39,7 @@ import Core.Sender
   (AuthToken, ConfirmationCode, MonadSender(..), Phone, SenderAccount)
 import Core.Time (Seconds)
 
-import Union.App.Configuration
-  (Config(..), DatabaseConfig(..), defaultConfig, loadConfig)
+import Union.App.Configuration (Config(..), DatabaseConfig(..), loadConfig)
 import Union.App.Error (Error(..))
 
 
@@ -114,9 +114,8 @@ instance MonadSender App where
       Just senderPhone -> do
         result <- Twilio.sendSms account token senderPhone to code `catch` \case
           VanillaHttpException e -> do
-            logException e >> Core.throwError
-              Error
-              (ApiError "Cannot send confirmation code")
+            logException e
+            Core.throwError Error (ApiError "Cannot send confirmation code")
           JsonHttpException e -> Core.throwError Error . ApiError $ toText e
         case result of
           Left  e -> Core.throwError Error $ ApiError e
@@ -126,9 +125,11 @@ instance MonadSender App where
 -- | Create Union 'Env' with given path to 'Config'.
 buildEnv :: Maybe FilePath -> IO Env
 buildEnv path = do
-  eConfig <- maybe (pure defaultConfig) loadConfig path
+  cfg <- maybe (pure def) loadConfig path
+  db  <- applyEnv (dcCredentials $ cDatabase cfg) <$> dbCredentialsEnv
+  let eConfig = cfg { cDatabase = (cDatabase cfg) { dcCredentials = db } }
   let DatabaseConfig {..} = cDatabase eConfig
-  let eLogger             = Core.setLogger $ cSeverity eConfig
+  let eLogger = Core.setLogger $ cSeverity cfg
   eJwtSecret    <- JwtSecret <$> Core.mkRandomString 10
   senderAccount <- Twilio.findSenderAccount
   senderToken   <- Twilio.findAuthToken
@@ -141,6 +142,54 @@ runWithEnv path action = buildEnv path >>= flip Core.runApp action
 {-# INLINE runWithEnv #-}
 
 -- | Helper to kill the app.
-kill :: (MonadReader env m, MonadFail m, WithLog m) => Text -> m b
+kill :: (MonadFail m, WithLog m) => Text -> m b
 kill msg = withFrozenCallStack (logError msg >> fail "Check logs ⇡")
 {-# INLINE kill #-}
+
+
+-- | Helper to build 'DbCredentials' from environment variables.
+dbCredentialsEnv :: IO (Maybe DbCredentials)
+dbCredentialsEnv = do
+  host     <- build "host" <$> lookup envDbHost
+  port     <- build "port" <$> lookup envDbPort
+  user     <- build "user" <$> lookup envDbUser
+  password <- build "password" <$> lookup envDbPassword
+  db       <- build "dbname" <$> lookup envDbName
+
+  if all isNothing [host, port, user, password, db]
+    then pure Nothing
+    else pure $ DbCredentials <$> mconcat [host, port, db, user, password]
+  where
+    lookup :: MonadIO m => String -> m (Maybe String)
+    lookup name = lookupEnv name >>= \case
+      Just env
+        | null env  -> pure Nothing
+        | otherwise -> pure $ Just env
+      Nothing  -> pure Nothing
+
+    build :: Text -> Maybe String -> Maybe Text
+    build option env = ((" " <> option <> "=") <>) . toText <$> env
+
+-- | Helper to combine environment variable with provided value.
+applyEnv :: Semigroup a => a -> Maybe a -> a
+applyEnv value = maybe value (value <>)
+
+-- | Env name for database host.
+envDbHost :: String
+envDbHost = "UNION_DB_HOST"
+
+-- | Env name for database port.
+envDbPort :: String
+envDbPort = "UNION_DB_PORT"
+
+-- | Env name for database user.
+envDbUser :: String
+envDbUser = "UNION_DB_USER"
+
+-- | Env name for database password.
+envDbPassword :: String
+envDbPassword = "UNION_DB_PASSWORD"
+
+-- | Env name for database name.
+envDbName :: String
+envDbName = "UNION_DB_NAME"

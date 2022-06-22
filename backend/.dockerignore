@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: 2022 Union
+#
+# SPDX-License-Identifier: CC0-1.0
+
+.stack-work/*
+.hindent.yaml
+.hlint.yaml
+brittany.yaml
+hie.yaml

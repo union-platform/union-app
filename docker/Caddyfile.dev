@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: 2022 Union
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+4dev.api.unionapp.cc {
+  encode gzip
+  reverse_proxy backend:8080
+	log {
+		output file /var/log/caddy/web-union-server.log
+	}
+}
