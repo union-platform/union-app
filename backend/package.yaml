@@ -73,8 +73,6 @@ ghc-options:
   # For details on warnings:
   # https://downloads.haskell.org/~ghc/master/users-guide/using-warnings.html
 
-  # Warn on tabs (spaces are better)
-  - -fwarn-tabs
   # Enable all warnings and disable the ones we don’t care about
   - -Weverything
 
@@ -90,39 +88,18 @@ ghc-options:
   - -Wno-all-missed-specialisations
   # Don’t use Safe Haskell warnings
   - -Wno-unsafe
-  # Don’t use Safe Haskell warnings
   - -Wno-safe
+  - -Wno-inferred-safe-imports
+  - -Wno-missing-safe-haskell-mode
   # Warning for polymorphic local bindings; nothing wrong with those
   - -Wno-missing-local-signatures
   # Don’t warn if the monomorphism restriction is used
   - -Wno-monomorphism-restriction
-  # Allow one-line do blocks
-  - -Wno-unused-do-bind
   # Do not warn if Prelude is imported implicitly
   - -Wno-implicit-prelude
-
-  # Warns when a pattern match might fail at runtime in a lambda or pattern binding
-  - -Wincomplete-uni-patterns
-  # Enables a warning when a record update could fail at runtime
-  - -Wincomplete-record-updates
-  # Will trigger when you create a record that could trigger the above warning
-  - -Wpartial-fields
-  # This warning will tell you when you’ve used toRational, toInteger, and
-  # realToFrac, but haven’t actually changed the type (e.g. Int32 to Int32)
-  - -Widentities
-  # This will warn you when one of your constraints is subsumed by another
-  - -Wredundant-constraints
-  # This warns you for a module declaration without declaring an explicit export list
-  - -Wmissing-export-lists
-  # Warns about unused packages
-  - -Wunused-packages
-
-when:
-  - condition: impl(ghc >= 8.10.0)
-    ghc-options:
-      - -Wno-prepositive-qualified-module
-      - -Wno-inferred-safe-imports
-      - -Wno-missing-safe-haskell-mode
+  # Do not warn for old qualified import style since britanny cannot
+  # understand it ;(
+  - -Wno-prepositive-qualified-module
 
 dependencies:
   - base >=4.10 && < 5
