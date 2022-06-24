@@ -44,7 +44,6 @@ you must be able to justify that.
   - [ ] My changes doesn't break any Licenses.
   - [ ] I added an entry to the [changelog](../tree/master/CHANGES.md) if my changes are visible to the users
         and
-  - [ ] provided a migration guide for breaking changes if possible
 
 #### Stylistic guide (mandatory)
 
