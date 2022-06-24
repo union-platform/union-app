@@ -4,16 +4,20 @@
  - SPDX-License-Identifier: AGPL-3.0-or-later
  -->
 
-# Union
+# Union-server
 
-...
+To run Union you can run `union-server run`. It will launch with default
+hardcoded config, if you want to provide custom config - use `-c PATH_TO_CONFIG`
+option.
 
-## Documentation [↑](#union)
+To see all available options run `union-server -h`.
+
+## Documentation [↑](#Union-server)
 
 Union serves Swagger UI with API documentation, to see it - launch backend
 instance and go to `/docs`.
 
-## Migrations [↑](#union)
+## Migrations [↑](#Union-server)
 
 Union server applies all migrations at startup; migrations:
 
