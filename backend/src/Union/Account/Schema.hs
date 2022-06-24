@@ -103,9 +103,10 @@ newtype UserAgent = UserAgent
   { getUserAgent :: Text
   }
   deriving stock Generic
-  deriving newtype (Show, Eq, DBType, DBEq)
-  deriving newtype (ToJSON, FromJSON, FromHttpApiData, ToHttpApiData)
-  deriving newtype (ToParamSchema, ToSchema)
+  deriving newtype
+    ( Show, Eq, DBType, DBEq, ToJSON, FromJSON, FromHttpApiData, ToHttpApiData
+    , ToParamSchema, ToSchema
+    )
 
 -- | Auth log.
 data AuthLog f = AuthLog
