@@ -175,7 +175,12 @@ executables:
     ghc-options:
       - -threaded
       - -rtsopts
-      - '"-with-rtsopts=-T -N"'
+      # Enable -N to use multiple threads and -T for runtime stats.
+      # Increase allocation area by using the recommended -A64m option.
+      # Also increase the allocation area for large objects with -AL256m,
+      # since this area is shared between all threads and thus with high -N
+      # values get used up too soon.
+      - '"-with-rtsopts=-T -N -A64m -AL256m"'
     dependencies:
       - union
       - with-utf8
@@ -201,9 +206,6 @@ tests:
       # values get used up too soon.
       #
       # With these options tests usually run faster.
-      #
-      # Weird quoting is required for cabal to correctly pass this
-      # as _one_ option, otherwise it splits by spaces.
       - '"-with-rtsopts=-N -A64m -AL256m"'
     dependencies:
       - union
