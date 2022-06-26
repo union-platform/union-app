@@ -26,7 +26,7 @@ import Core.Sender (ConfirmationCode(..), Phone(..))
 import Core.Swagger (genericNamedSchema)
 
 
--- | Sign In request.
+-- | Request Code request (Sign In 1 step).
 newtype RequestCodeReq = RequestCodeReq
   { rc_reqPhone :: Phone
   }
@@ -41,7 +41,7 @@ instance ToSchema RequestCodeReq where
             (RequestCodeReq $ Phone "+1234567890")
         ]
 
--- | Sign In request.
+-- | Sign In request (Sign In 2 step).
 data SignInReq = SignInReq
   { si_reqPhone :: Phone
   , si_reqCode  :: ConfirmationCode
@@ -78,4 +78,3 @@ instance ToSchema SignInResp where
             .  O.description
             ?~ "Returns JWT token for further use as authenticated user."
         ]
-
