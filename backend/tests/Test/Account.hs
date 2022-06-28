@@ -107,7 +107,7 @@ accountTests env = testGroup
       Nothing   -> pure $ ConfirmationCode "wrong"
       Just code -> pure code
     let req2 = SignInReq { si_reqPhone = phone, si_reqCode = code }
-    withClient env (_signIn accountClient Nothing req2)
+    void $ withClient env (_signIn accountClient Nothing req2)
     runMockApp env $ findAuthLog account >>= \case
       Nothing -> liftIO $ expectationFailure "Cannot find auth log in DB"
       Just AuthLog {..} -> liftIO $ alCode `shouldBe` code
