@@ -106,7 +106,7 @@ decodeTextIdPayload = fmap JwtPayload . payloadFromMap
 {-# INLINE decodeTextIdPayload #-}
 
 -- | Creates 'Jwt.ClaimsMap' from 'Json.Value' under name @id@.
-payloadToMap :: Json.Value -> Jwt.ClaimsMap
+payloadToMap :: Value -> Jwt.ClaimsMap
 payloadToMap val = Jwt.ClaimsMap $ Map.fromList [("id", val)]
 {-# INLINE payloadToMap #-}
 
@@ -164,7 +164,7 @@ verifyJwtTokenImpl
   -> JwtToken
   -> m (Maybe (JwtPayload payload))
 verifyJwtTokenImpl decode (JwtSecret jwtSecret) (JwtToken token) = do
-  let secret = Jwt.hmacSecret jwtSecret
+  let secret = Jwt.toVerify $ Jwt.hmacSecret jwtSecret
   timeNow <- Jwt.numericDate <$> liftIO getPOSIXTime
   pure $ do
     claimsSet <- Jwt.claims <$> Jwt.decodeAndVerifySignature secret token

@@ -17,7 +17,7 @@ import Servant.API
   (Description, Header, NoContent(..), PostCreated, RemoteHost, Summary)
 import Servant.API.Generic ((:-), ToServantApi)
 
-import Core.Error (throwError)
+import Core.Error (throwError, throwOnNothingM)
 import Core.Logger (Severity(..), logDebug, logInfo)
 import Core.Sender (isPhoneValid)
 
@@ -96,8 +96,13 @@ signInHandler address agent SignInReq {..} = do
     <> " attempts to sign in with OTP "
     <> show si_reqCode
   account <-
-    whenNothingM (findAccount si_reqPhone) . throwError Info $ NotAllowed
-      "Provided phone number or OTP is not valid"
+    throwOnNothingM
+        Info
+        (NotAllowed "Provided phone number or OTP is not valid")
+      $ findAccount si_reqPhone
+  -- account <-
+    -- whenNothingM (findAccount si_reqPhone) . throwError Info $ NotAllowed
+      -- "Provided phone number or OTP is not valid"
   logInfo $ "Account " <> show si_reqPhone <> " signed in"
   -- if code is not valid `signIn` will throw same error as we do it in case
   -- when there is no such number

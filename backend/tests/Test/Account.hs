@@ -16,9 +16,9 @@ import Network.HTTP.Types.Status
 import Rel8 ((==.), Result)
 import Servant.Client.Core (RunClient)
 import Servant.Client.Generic (AsClientT, genericClient)
+import Test.Hspec (expectationFailure, shouldBe, shouldThrow)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (assertBool, testCase)
-import Test.Tasty.Hspec (expectationFailure, shouldBe, shouldThrow)
 
 import Core.Jwt (JwtToken(..))
 import Core.Sender (ConfirmationCode(..), Phone(..))
