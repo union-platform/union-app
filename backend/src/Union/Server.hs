@@ -5,8 +5,9 @@
 -- | This module introduce aliases to use for @servant-generic@ types and
 -- functions writing.
 module Union.Server
-  ( application
+  ( Endpoints(..)
   , api
+  , application
   , server
   ) where
 
@@ -18,8 +19,8 @@ import qualified Servant.OpenApi as O
 import Control.Lens ((.~), (?~))
 import Control.Monad.Except (liftEither)
 import Data.Version (showVersion)
-import Servant.API (type (:<|>)((:<|>)))
-import Servant.API.Generic ((:-), ToServantApi, toServant)
+import Servant.API (type (:<|>)((:<|>)), NamedRoutes)
+import Servant.API.Generic ((:-))
 import Servant.OpenApi (HasOpenApi(..))
 import Servant.Server (Application, Handler, Server, hoistServer, serve)
 import Servant.Swagger.UI (SwaggerSchemaUI, swaggerSchemaUIServer)
@@ -37,28 +38,28 @@ import Union.App.Error (toHttpError)
 -- | Union web application
 application :: Env -> Application
 application env =
-  serve (Proxy @(WithSwagger "docs" API)) $ server env :<|> swagger
+  serve @(WithSwagger "docs" API) Proxy $ server env :<|> swagger
 
 -- | Union web server.
 server :: Env -> Server API
-server env = hoistServer api toHandler $ toServant endpoints
+server env = hoistServer api toHandler endpoints
   where
     toHandler :: App a -> Handler a
     toHandler app =
       liftIO (runAppLogIO env app) >>= liftEither . first toHttpError
 
 -- | Represents combination of all endpoints, available in Union.
-newtype Endpoints route = Endpoints
-  { eAccount :: route :- AccountAPI
+newtype Endpoints mode = Endpoints
+  { eAccount :: mode :- AccountAPI
   }
   deriving stock Generic
 
 -- | Represents combination of all endpoints, available in Union.
 endpoints :: Endpoints Union
-endpoints = Endpoints { eAccount = toServant accountEndpoints }
+endpoints = Endpoints { eAccount = accountEndpoints }
 
 -- | Helper type to represent Union API in terms of Servant.
-type API = ToServantApi Endpoints
+type API = NamedRoutes Endpoints
 
 -- | Helper function for referring to whole Union API.
 api :: Proxy API
@@ -87,6 +88,4 @@ swagger =
             )
          )
        )
-    &  O.applyTagsFor
-         (O.subOperations (Proxy :: Proxy AccountAPI) api)
-         ["Account"]
+    &  O.applyTagsFor (O.subOperations @AccountAPI Proxy api) ["Account"]

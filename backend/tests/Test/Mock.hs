@@ -9,6 +9,7 @@ module Test.Mock
   , runMockApp
   , initMockApp
   , withClient
+  , rootClient
   , apiStatusCode
   ) where
 
@@ -28,6 +29,8 @@ import Servant.Client
   , responseStatusCode
   , runClientM
   )
+import Servant.Client.Core (RunClient)
+import Servant.Client.Generic (AsClientT, genericClient)
 import Servant.Server (Application, serve)
 import System.Process (readProcess)
 
@@ -42,7 +45,7 @@ import Union.App.Configuration (Config(..), DatabaseConfig(..), loadConfig)
 import Union.App.Db (runDb)
 import Union.App.Env (Env(..))
 import Union.App.Error (Error)
-import Union.Server (api, server)
+import Union.Server (Endpoints, api, server)
 
 
 -- | Mock monad.
@@ -78,7 +81,7 @@ initMockApp env = runApp env $ do
 mockApplication :: Env -> Application
 mockApplication = serve api . server
 
--- Creating a new Manager is a relatively expensive operation, so we will try
+-- | Creating a new Manager is a relatively expensive operation, so we will try
 -- share a single Manager between tests.
 withClient :: Env -> ClientM a -> IO a
 withClient env action = do
@@ -90,6 +93,10 @@ withClient env action = do
         manager <- newManager defaultManagerSettings
         let clientEnv = mkClientEnv manager (baseUrl { baseUrlPort = port })
         runClientM action clientEnv >>= either throwIO pure
+
+-- | Represents our API in terms of client.
+rootClient :: RunClient m => Endpoints (AsClientT m)
+rootClient = genericClient
 
 -- | Checks that returned 'Status' is expected.
 apiStatusCode :: Status -> ClientError -> Bool

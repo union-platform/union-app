@@ -14,8 +14,15 @@ import Relude
 import Network.Socket (SockAddr)
 import Servant ((:>), JSON, Post, ReqBody)
 import Servant.API
-  (Description, Header, NoContent(..), PostCreated, RemoteHost, Summary)
-import Servant.API.Generic ((:-), ToServantApi)
+  ( Description
+  , Header
+  , NamedRoutes
+  , NoContent(..)
+  , PostCreated
+  , RemoteHost
+  , Summary
+  )
+import Servant.API.Generic ((:-))
 
 import Core.Error (throwError, throwOnNothingM)
 import Core.Logger (Severity(..), logDebug, logInfo)
@@ -30,11 +37,11 @@ import Union.App.Error (Error(..))
 
 
 -- | Helper type to represent Account API in terms of Servant.
-type AccountAPI = ToServantApi AccountEndpoints
+type AccountAPI = NamedRoutes AccountEndpoints
 
 -- | Represents API related to account.
-data AccountEndpoints route = AccountEndpoints
-  { _requestCode :: route
+data AccountEndpoints mode = AccountEndpoints
+  { _requestCode :: mode
       :- "accounts"
       :> "signIn"
       :> "request"
@@ -45,7 +52,7 @@ data AccountEndpoints route = AccountEndpoints
         \ such phone - we will create it and send code then."
       :> ReqBody '[JSON] RequestCodeReq
       :> PostCreated '[JSON] NoContent
-  , _signIn :: route
+  , _signIn :: mode
       :- "accounts"
       :> "signIn"
       :> Summary "Sign In to account"
@@ -69,9 +76,7 @@ accountEndpoints = AccountEndpoints
 
 -- | Handler for sign in first step: when confirmation code is requested.
 requestCodeHandler
-  :: (MonadIO m, WithLog m, WithError m, WithSender m)
-  => RequestCodeReq
-  -> m NoContent
+  :: (WithLog m, WithError m, WithSender m) => RequestCodeReq -> m NoContent
 requestCodeHandler RequestCodeReq {..} = do
   unless (isPhoneValid rc_reqPhone) . throwError Info $ BadRequest
     "Provided phone is not valid"
@@ -84,7 +89,7 @@ requestCodeHandler RequestCodeReq {..} = do
 
 -- | Handler for sign in first step: when confirmation code is provided.
 signInHandler
-  :: (MonadIO m, WithLog m, WithError m, WithJwt m, WithSender m)
+  :: (WithLog m, WithError m, WithJwt m, WithSender m)
   => SockAddr
   -- ^ Request address to record 'AuthLog'
   -> Maybe UserAgent
@@ -100,9 +105,6 @@ signInHandler address agent SignInReq {..} = do
         Info
         (NotAllowed "Provided phone number or OTP is not valid")
       $ findAccount si_reqPhone
-  -- account <-
-    -- whenNothingM (findAccount si_reqPhone) . throwError Info $ NotAllowed
-      -- "Provided phone number or OTP is not valid"
   logInfo $ "Account " <> show si_reqPhone <> " signed in"
   -- if code is not valid `signIn` will throw same error as we do it in case
   -- when there is no such number
