@@ -107,7 +107,7 @@ library
       UndecidableInstances
       UndecidableSuperClasses
       ViewPatterns
-  ghc-options: -Weverything -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-inferred-safe-imports -Wno-missing-safe-haskell-mode -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-implicit-prelude -Wno-prepositive-qualified-module
+  ghc-options: -Werror -Weverything -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-inferred-safe-imports -Wno-missing-safe-haskell-mode -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-implicit-prelude -Wno-prepositive-qualified-module
   build-depends:
       aeson
     , base >=4.10 && <5
@@ -125,7 +125,6 @@ library
     , hasql-pool
     , hasql-transaction
     , http-api-data
-    , http-media
     , http-types
     , jwt
     , lens
@@ -211,7 +210,7 @@ executable union-server
       UndecidableInstances
       UndecidableSuperClasses
       ViewPatterns
-  ghc-options: -Weverything -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-inferred-safe-imports -Wno-missing-safe-haskell-mode -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-implicit-prelude -Wno-prepositive-qualified-module -threaded -rtsopts "-with-rtsopts=-T -N -A64m -AL256m"
+  ghc-options: -Werror -Weverything -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-inferred-safe-imports -Wno-missing-safe-haskell-mode -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-implicit-prelude -Wno-prepositive-qualified-module -threaded -rtsopts "-with-rtsopts=-T -N -A64m -AL256m"
   build-depends:
       base >=4.10 && <5
     , relude >=1.0
@@ -280,7 +279,7 @@ test-suite union-tests
       UndecidableInstances
       UndecidableSuperClasses
       ViewPatterns
-  ghc-options: -Weverything -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-inferred-safe-imports -Wno-missing-safe-haskell-mode -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-implicit-prelude -Wno-prepositive-qualified-module -Wno-incomplete-patterns -Wno-incomplete-uni-patterns -threaded -eventlog "-with-rtsopts=-N -A64m -AL256m"
+  ghc-options: -Werror -Weverything -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-inferred-safe-imports -Wno-missing-safe-haskell-mode -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-implicit-prelude -Wno-prepositive-qualified-module -Wno-incomplete-patterns -Wno-incomplete-uni-patterns -threaded -eventlog "-with-rtsopts=-N -A64m -AL256m"
   build-depends:
       QuickCheck
     , base >=4.10 && <5

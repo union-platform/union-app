@@ -73,6 +73,8 @@ ghc-options:
   # For details on warnings:
   # https://downloads.haskell.org/~ghc/master/users-guide/using-warnings.html
 
+  # Assume every warning as error
+  - -Werror
   # Enable all warnings and disable the ones we don’t care about
   - -Weverything
 
@@ -146,7 +148,7 @@ library:
     - aeson
     - deriving-aeson
     - http-api-data
-    - http-media
+    # - http-media
     - http-types
     - jwt
     - network
