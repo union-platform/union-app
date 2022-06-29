@@ -33,8 +33,10 @@ import Core.Logger (WithLog, logMsg)
 -- * @env@: application environment that stores settings and in-memory caches
 -- * @a@: monadic result
 newtype App (err :: Type) env a = App { getApp :: ReaderT env IO a }
-  deriving newtype (Functor, Applicative)
-  deriving newtype (Monad, MonadIO, MonadUnliftIO, MonadFail, MonadReader env)
+  deriving newtype
+    ( Functor, Applicative, Monad, MonadIO, MonadUnliftIO, MonadFail
+    , MonadReader env
+    )
 
 -- | This instance allows to throw and catch errors that are visible in type
 -- definitions. The implementation relies on underlying 'IO' machinery.

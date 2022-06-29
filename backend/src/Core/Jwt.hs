@@ -56,8 +56,10 @@ newtype JwtSecret = JwtSecret { getJwtSecret :: Text }
 -- | Encoded JSON web token.
 newtype JwtToken = JwtToken { getJwtToken :: Text }
   deriving stock (Show, Generic)
-  deriving newtype (Eq, Ord, Hashable)
-  deriving newtype (FromHttpApiData, FromJSON, ToJSON, ToParamSchema, ToSchema)
+  deriving newtype
+    ( Eq, Ord, Hashable, FromHttpApiData, FromJSON, ToJSON, ToParamSchema
+    , ToSchema
+    )
 
 -- | Stores arbitrary payload. If you want to store your custom payload, you
 -- need to specify two functions:

@@ -28,8 +28,8 @@ import Text.Regex (matchRegex, mkRegex)
 -- plus sign.
 newtype Phone = Phone { getPhone :: Text }
   deriving stock Generic
-  deriving newtype (Show, Eq, DBType, DBEq)
-  deriving newtype (ToJSON, FromJSON, ToParamSchema, ToSchema)
+  deriving newtype
+    (Show, Eq, DBType, DBEq, ToJSON, FromJSON, ToParamSchema, ToSchema)
 
 
 -- | Simple 'Phone' validation.
@@ -51,8 +51,7 @@ newtype AuthToken = AuthToken { getAuthToken :: Text }
 -- | Confirmation code.
 newtype ConfirmationCode = ConfirmationCode { getCode :: Text }
   deriving stock (Show, Generic)
-  deriving newtype (Eq, DBType, DBEq)
-  deriving newtype (ToJSON, FromJSON, ToParamSchema, ToSchema)
+  deriving newtype (Eq, DBType, DBEq, ToJSON, FromJSON, ToParamSchema, ToSchema)
 
 
 -- | This monad represents effect to send something to user.
