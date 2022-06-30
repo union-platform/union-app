@@ -3,7 +3,7 @@
 -- SPDX-License-Identifier: AGPL-3.0-or-later
 
 -- | This module represents account related database schema.
-module Union.Profile.Schema
+module Union.Account.Profile.Schema
   ( -- * Profile
     Profile(..)
   , profileSchema
@@ -16,7 +16,7 @@ import Rel8 (Column, Name, Rel8able, Result, TableSchema(..))
 import Core.Db (Id)
 
 import Union.Account.Schema (Account)
-import Union.Profile.Types (UserName)
+import Union.Account.Profile.Types (UserName)
 
 
 -- | User's profile.

@@ -15,6 +15,7 @@ import Test.QuickCheck.Instances ()
 
 import Core.Jwt (JwtToken(..))
 import Core.Sender (ConfirmationCode(..), Phone(..))
+import Union.Account.Profile.Types (CreateProfileReq(..))
 import Union.Account.Schema (UserAgent(..))
 import Union.Account.Types (RequestCodeReq(..), SignInReq(..), SignInResp(..))
 
@@ -32,3 +33,6 @@ instance Arbitrary SignInReq where
 
 instance Arbitrary SignInResp where
   arbitrary = SignInResp <$> arbitrary
+
+instance Arbitrary CreateProfileReq where
+  arbitrary = CreateProfileReq <$> arbitrary

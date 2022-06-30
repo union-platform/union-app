@@ -43,6 +43,9 @@ library
       Core.Time
       Service.Twilio
       Union
+      Union.Account.Profile.Schema
+      Union.Account.Profile.Server
+      Union.Account.Profile.Types
       Union.Account.Schema
       Union.Account.Server
       Union.Account.Service
@@ -52,8 +55,6 @@ library
       Union.App.Env
       Union.App.Error
       Union.Middleware
-      Union.Profile.Schema
-      Union.Profile.Types
       Union.Server
   other-modules:
       Paths_union

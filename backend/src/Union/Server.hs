@@ -30,6 +30,7 @@ import qualified Paths_union as Meta
 import Core.Monad (runAppLogIO)
 import Core.Swagger (WithSwagger)
 
+import Union.Account.Profile.Server (ProfileAPI, profileEndpoints)
 import Union.Account.Server (AccountAPI, accountEndpoints)
 import Union.App.Env (App, Env, Union)
 import Union.App.Error (toHttpError)
@@ -49,14 +50,16 @@ server env = hoistServer api toHandler endpoints
       liftIO (runAppLogIO env app) >>= liftEither . first toHttpError
 
 -- | Represents combination of all endpoints, available in Union.
-newtype Endpoints mode = Endpoints
+data Endpoints mode = Endpoints
   { eAccount :: mode :- AccountAPI
+  , eProfile :: mode :- ProfileAPI
   }
   deriving stock Generic
 
 -- | Represents combination of all endpoints, available in Union.
 endpoints :: Endpoints Union
-endpoints = Endpoints { eAccount = accountEndpoints }
+endpoints =
+  Endpoints { eAccount = accountEndpoints, eProfile = profileEndpoints }
 
 -- | Helper type to represent Union API in terms of Servant.
 type API = NamedRoutes Endpoints
@@ -89,3 +92,4 @@ swagger =
          )
        )
     &  O.applyTagsFor (O.subOperations @AccountAPI Proxy api) ["Account"]
+    &  O.applyTagsFor (O.subOperations @ProfileAPI Proxy api) ["Account"]
