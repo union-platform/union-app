@@ -1,9 +1,7 @@
-// SPDX-FileCopyrightText: 2021 Union
+// SPDX-FileCopyrightText: 2022 Union
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-// jest-dom adds custom jest matchers for asserting on DOM nodes.
-// allows you to do things like:
-// expect(element).toHaveTextContent(/react/i)
-// learn more: https://github.com/testing-library/jest-dom
-import '@testing-library/jest-dom';
+import { toHaveNoViolations } from 'jest-axe';
+
+expect.extend(toHaveNoViolations);

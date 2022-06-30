@@ -1,6 +1,7 @@
 {
+  "name": "Union | Place where you can be yourself",
   "short_name": "Union",
-  "name": "Union",
+  "description": "Union is a platform where you can find your labor of love, join a team, create something important or crazy; this is a place where you can be yourself.",
   "icons": [
     {
       "src": "favicon.ico",

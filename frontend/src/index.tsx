@@ -1,21 +1,27 @@
-// SPDX-FileCopyrightText: 2021 Union
+// SPDX-FileCopyrightText: 2021-2022 Union
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import App from './routes/App';
+import Onboarding from './routes/Onboarding';
+import Login from './routes/Login';
 
+/**
+ *  Starting point of the application
+ */
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<App />} />
+        <Route path="onboarding" element={<Onboarding />} />
+        <Route path="login" element={<Login />} />
+      </Routes>
+    </BrowserRouter>
   </React.StrictMode>,
   document.getElementById('root'),
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
