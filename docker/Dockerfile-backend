@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-FROM haskell:8.10.7-slim AS builder
+FROM haskell:9.0.2-slim AS builder
 
 WORKDIR /opt/union-server
 

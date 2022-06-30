@@ -98,14 +98,14 @@ toLogMsg ErrorWithSource {..} = Msg
 -- does not exist.
 throwOnNothing :: WithError err m => Severity -> err -> Maybe a -> m a
 throwOnNothing severity err =
-  withFrozenCallStack . maybe (throwError severity err) pure
+  withFrozenCallStack (maybe (throwError severity err) pure)
 {-# INLINE throwOnNothing #-}
 
 -- - | Extract the value from a 'Maybe' in @m@, throwing the given @err@ if
 -- the value does not exist.
 throwOnNothingM :: WithError err m => Severity -> err -> m (Maybe a) -> m a
 throwOnNothingM severity err action =
-  withFrozenCallStack $ action >>= throwOnNothing severity err
+  withFrozenCallStack (action >>= throwOnNothing severity err)
 {-# INLINE throwOnNothingM #-}
 
 -- | Converts @err@ to 'Text' with pretty formatting.

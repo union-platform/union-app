@@ -15,10 +15,11 @@ import Network.HTTP.Types.Status
   (badRequest400, tooManyRequests429, unauthorized401)
 import Rel8 ((==.), Result)
 import Servant.Client.Core (RunClient)
-import Servant.Client.Generic (AsClientT, genericClient)
+import Servant.Client.Generic (AsClientT)
+import Servant.Client.Core.HasClient ((//))
+import Test.Hspec (expectationFailure, shouldBe, shouldThrow)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (assertBool, testCase)
-import Test.Tasty.Hspec (expectationFailure, shouldBe, shouldThrow)
 
 import Core.Jwt (JwtToken(..))
 import Core.Sender (ConfirmationCode(..), Phone(..))
@@ -34,9 +35,13 @@ import Union.Account.Service (findAccount)
 import Union.Account.Types (RequestCodeReq(..), SignInReq(..), SignInResp(..))
 import Union.App.Db (executeS, selectOne)
 import Union.App.Env (Env)
+import Union.Server (Endpoints(..))
 
-import Test.Mock (MockApp, apiStatusCode, runMockApp, withClient)
+import Test.Mock (MockApp, apiStatusCode, runMockApp, withClient, rootClient)
 
+
+accountClient :: RunClient m => AccountEndpoints (AsClientT m)
+accountClient = rootClient // eAccount
 
 accountTests :: Env -> TestTree
 accountTests env = testGroup
@@ -112,9 +117,7 @@ accountTests env = testGroup
       Nothing -> liftIO $ expectationFailure "Cannot find auth log in DB"
       Just AuthLog {..} -> liftIO $ alCode `shouldBe` code
   ]
-  where
-    accountClient :: RunClient m => AccountEndpoints (AsClientT m)
-    accountClient = genericClient
+
 
 -- | Helper to find 'ConfirmationCode' in DB.
 findCode :: Maybe (Account Result) -> MockApp (Maybe ConfirmationCode)

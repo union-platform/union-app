@@ -45,7 +45,7 @@ type WithSwagger url api = api :<|> SwaggerSchemaUI url "swagger.json"
 
 -- | Shorter version of 'declareSchemaRef'. So instead of
 -- @
--- 'declareSchemaRef' ('Proxy' @MyType)
+-- 'declareSchemaRef' @MyType 'Proxy'
 -- @
 -- you can write
 -- @
@@ -53,7 +53,7 @@ type WithSwagger url api = api :<|> SwaggerSchemaUI url "swagger.json"
 -- @
 schemaRef
   :: forall t . ToSchema t => Declare (Definitions Schema) (Referenced Schema)
-schemaRef = declareSchemaRef (Proxy @t)
+schemaRef = declareSchemaRef @t Proxy
 
 -- | Helper function to return named schemas. So instead of:
 -- @
