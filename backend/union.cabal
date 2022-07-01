@@ -49,7 +49,10 @@ library
       Union.Account.Schema
       Union.Account.Server
       Union.Account.Service
-      Union.Account.Types
+      Union.Account.SignIn.Schema
+      Union.Account.SignIn.Server
+      Union.Account.SignIn.Service
+      Union.Account.SignIn.Types
       Union.App.Configuration
       Union.App.Db
       Union.App.Env

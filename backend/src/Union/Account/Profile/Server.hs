@@ -30,8 +30,7 @@ type ProfileAPI = NamedRoutes ProfileEndpoints
 -- | Represents API related to profile.
 newtype ProfileEndpoints mode = ProfileEndpoints
   { _createProfile :: mode
-      :- "accounts"
-      :> "profile"
+      :- "profile"
       :> Summary "Create profile"
       :> Description
         "With this endpoint we can create actual user profile. Account stores \

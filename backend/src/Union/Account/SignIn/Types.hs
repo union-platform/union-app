@@ -2,12 +2,13 @@
 --
 -- SPDX-License-Identifier: AGPL-3.0-or-later
 
--- | This module represents account related types, which is not related to DB,
+-- | This module represents signIn related types, which is not related to DB,
 -- mostly here is helper types for API.
-module Union.Account.Types
+module Union.Account.SignIn.Types
   ( RequestCodeReq(..)
-  , SignInReq(..)
-  , SignInResp(..)
+  , UserAgent(..)
+  , AuthenticateReq(..)
+  , AuthenticateResp(..)
   ) where
 
 import Relude
@@ -17,8 +18,10 @@ import qualified Data.OpenApi as O
 import Control.Lens ((?~))
 import Control.Lens.Setter (mapped)
 import Data.Aeson (FromJSON, ToJSON(..))
-import Data.OpenApi (ToSchema(..))
+import Data.OpenApi (ToParamSchema, ToSchema(..))
 import Deriving.Aeson (CustomJSON(..))
+import Rel8 (DBEq, DBType)
+import Servant.API (FromHttpApiData, ToHttpApiData)
 
 import Core.Json (JsonCamelCase)
 import Core.Jwt (JwtToken)
@@ -41,20 +44,32 @@ instance ToSchema RequestCodeReq where
             (RequestCodeReq $ Phone "+1234567890")
         ]
 
+-- | Represents 'User-Agent' header.
+newtype UserAgent = UserAgent
+  { getUserAgent :: Text
+  }
+  deriving stock Generic
+  deriving newtype
+    ( Show, Eq, DBType, DBEq, ToJSON, FromJSON, FromHttpApiData, ToHttpApiData
+    , ToParamSchema, ToSchema
+    )
+
 -- | Sign In request (Sign In 2 step).
-data SignInReq = SignInReq
-  { si_reqPhone :: Phone
-  , si_reqCode  :: ConfirmationCode
+data AuthenticateReq = AuthenticateReq
+  { a_reqPhone :: Phone
+  , a_reqCode  :: ConfirmationCode
   }
   deriving stock (Generic, Show, Eq)
-  deriving (FromJSON, ToJSON) via CustomJSON (JsonCamelCase "si_req") SignInReq
+  deriving (FromJSON, ToJSON) via CustomJSON
+    (JsonCamelCase "a_req")
+    AuthenticateReq
 
-instance ToSchema SignInReq where
-  declareNamedSchema = genericNamedSchema @(JsonCamelCase "si_req") extra
+instance ToSchema AuthenticateReq where
+  declareNamedSchema = genericNamedSchema @(JsonCamelCase "a_req") extra
     where
       extra =
         [ mapped . O.schema . O.example ?~ toJSON
-          (SignInReq (Phone "+1234567890") (ConfirmationCode "123456"))
+          (AuthenticateReq (Phone "+1234567890") (ConfirmationCode "123456"))
         , mapped
           .  O.schema
           .  O.description
@@ -63,14 +78,14 @@ instance ToSchema SignInReq where
         ]
 
 -- | Sign In response.
-newtype SignInResp = SignInResp
-  { si_respToken :: JwtToken
+newtype AuthenticateResp = AuthenticateResp
+  { a_respToken :: JwtToken
   }
   deriving stock (Generic, Show, Eq)
-  deriving (FromJSON, ToJSON) via CustomJSON (JsonCamelCase "si_resp") SignInResp
+  deriving (FromJSON, ToJSON) via CustomJSON (JsonCamelCase "a_resp") AuthenticateResp
 
-instance ToSchema SignInResp where
-  declareNamedSchema = genericNamedSchema @(JsonCamelCase "si_resp") extra
+instance ToSchema AuthenticateResp where
+  declareNamedSchema = genericNamedSchema @(JsonCamelCase "a_resp") extra
     where
       extra =
         [ mapped

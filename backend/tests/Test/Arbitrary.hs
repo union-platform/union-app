@@ -16,8 +16,8 @@ import Test.QuickCheck.Instances ()
 import Core.Jwt (JwtToken(..))
 import Core.Sender (ConfirmationCode(..), Phone(..))
 import Union.Account.Profile.Types (CreateProfileReq(..))
-import Union.Account.Schema (UserAgent(..))
-import Union.Account.Types (RequestCodeReq(..), SignInReq(..), SignInResp(..))
+import Union.Account.SignIn.Types
+  (AuthenticateReq(..), AuthenticateResp(..), RequestCodeReq(..), UserAgent(..))
 
 
 deriving newtype instance Arbitrary Phone
@@ -28,11 +28,11 @@ deriving newtype instance Arbitrary UserAgent
 instance Arbitrary RequestCodeReq where
   arbitrary = RequestCodeReq <$> arbitrary
 
-instance Arbitrary SignInReq where
-  arbitrary = SignInReq <$> arbitrary <*> arbitrary
+instance Arbitrary AuthenticateReq where
+  arbitrary = AuthenticateReq <$> arbitrary <*> arbitrary
 
-instance Arbitrary SignInResp where
-  arbitrary = SignInResp <$> arbitrary
+instance Arbitrary AuthenticateResp where
+  arbitrary = AuthenticateResp <$> arbitrary
 
 instance Arbitrary CreateProfileReq where
   arbitrary = CreateProfileReq <$> arbitrary
