@@ -37,14 +37,15 @@ import System.Process (readProcess)
 import qualified Core
 
 import Core.Db (DbCredentials(..))
-import Core.Jwt (JwtSecret(..))
 import Core.Logger (emptyLogger)
 import Core.Monad (runApp)
 import Core.Sender (AuthToken(..), SenderAccount(..))
-import Union.App.Configuration (Config(..), DatabaseConfig(..), loadConfig)
+import Union.App.Configuration
+  (Config(..), DatabaseConfig(..), jwtSettings, loadConfig)
 import Union.App.Db (runDb)
 import Union.App.Env (Env(..))
 import Union.App.Error (Error)
+import Union.Auth (generateKey)
 import Union.Server (Endpoints, api, server)
 
 
@@ -63,8 +64,8 @@ mockEnv = do
   db  <- DbCredentials . toText <$> generateTempDb
   let eConfig = cfg { cDatabase = (cDatabase cfg) { dcCredentials = db } }
   let DatabaseConfig {..} = cDatabase eConfig
-  let eLogger             = emptyLogger
-  let eJwtSecret          = JwtSecret "0123456789"
+  let eLogger = emptyLogger
+  eJwtSettings <- jwtSettings <$> generateKey
   let eSenderService = (SenderAccount "0123456789", AuthToken "0123456789")
   Core.withDb dcPoolSize dcTimeout dcCredentials $ \eDbPool -> pure Env { .. }
 

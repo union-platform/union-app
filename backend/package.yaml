@@ -147,14 +147,14 @@ library:
     # http
     - aeson
     - deriving-aeson
-    - http-api-data
     # - http-media
     - http-types
-    - jwt
+    - jose
     - network
     - openapi3
     - req
     - servant
+    - servant-auth-server
     - servant-openapi3
     - servant-server
     - servant-swagger-ui
@@ -167,7 +167,6 @@ library:
     - co-log
     - optparse-applicative
     - pretty-simple
-    - scientific
     - yaml
 
 executables:
@@ -217,15 +216,13 @@ tests:
       - QuickCheck
       - quickcheck-instances
       - tasty
-      - tasty-hedgehog
+      # - tasty-hedgehog
       - tasty-hspec
       - tasty-hunit
 
       - data-default
       - http-client
       - http-types
-      - jwt
-      - mmorph
       - process
       - rel8
       - servant-client

@@ -16,6 +16,7 @@ module Core.Time
   , currentMinute
   , currentHour
   , secondsInDiff
+  , addSeconds
   ) where
 
 import Relude
@@ -23,7 +24,9 @@ import Relude
 import qualified Control.Concurrent as C (threadDelay)
 
 import Data.Aeson (FromJSON, ToJSON)
-import Data.Time.Clock (UTCTime(..), diffUTCTime)
+import Data.Time.Clock
+  (UTCTime(..), addUTCTime, diffUTCTime, secondsToNominalDiffTime)
+import GHC.Num (integerFromInt)
 
 
 -- | Represents the amount of seconds.
@@ -64,3 +67,9 @@ currentHour (secondsElapsedInDay -> t) = t `div` 3600
 secondsInDiff :: UTCTime -> UTCTime -> Seconds
 secondsInDiff a b = Seconds . truncate $ diffUTCTime a b
 {-# INLINE secondsInDiff #-}
+
+-- | Adds 'Seconds' to 'UTCTime'.
+addSeconds :: Seconds -> UTCTime -> UTCTime
+addSeconds (getSeconds -> s) =
+  addUTCTime (secondsToNominalDiffTime . fromInteger $ integerFromInt s)
+{-# INLINE addSeconds #-}

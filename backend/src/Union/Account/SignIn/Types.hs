@@ -24,9 +24,10 @@ import Rel8 (DBEq, DBType)
 import Servant.API (FromHttpApiData, ToHttpApiData)
 
 import Core.Json (JsonCamelCase)
-import Core.Jwt (JwtToken)
 import Core.Sender (ConfirmationCode(..), Phone(..))
 import Core.Swagger (genericNamedSchema)
+
+import Union.Auth (JwtToken)
 
 
 -- | Request Code request (Sign In 1 step).
@@ -41,7 +42,7 @@ instance ToSchema RequestCodeReq where
     where
       extra =
         [ mapped . O.schema . O.example ?~ toJSON
-            (RequestCodeReq $ Phone "+1234567890")
+            (RequestCodeReq $ Phone "+12345678901")
         ]
 
 -- | Represents 'User-Agent' header.
@@ -69,7 +70,7 @@ instance ToSchema AuthenticateReq where
     where
       extra =
         [ mapped . O.schema . O.example ?~ toJSON
-          (AuthenticateReq (Phone "+1234567890") (ConfirmationCode "123456"))
+          (AuthenticateReq (Phone "+12345678901") (ConfirmationCode "123456"))
         , mapped
           .  O.schema
           .  O.description

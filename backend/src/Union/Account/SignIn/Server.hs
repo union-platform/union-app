@@ -33,7 +33,7 @@ import Union.Account.SignIn.Schema (ConfirmationScope(..))
 import Union.Account.SignIn.Service (sendConfirmationCode, signIn)
 import Union.Account.SignIn.Types
   (AuthenticateReq(..), AuthenticateResp(..), RequestCodeReq(..), UserAgent)
-import Union.App.Env (Union, WithError, WithJwt, WithLog, WithSender)
+import Union.App.Env (Union, WithDb, WithError, WithLog, WithSender)
 import Union.App.Error (Error(..))
 
 
@@ -88,7 +88,7 @@ requestCodeHandler RequestCodeReq {..} = do
 
 -- | Handler for sign in first step: when confirmation code is provided.
 authenticateHandler
-  :: (WithLog m, WithError m, WithJwt m, WithSender m)
+  :: (WithLog m, WithError m, WithDb m)
   => SockAddr
   -- ^ Request address to record 'AuthLog'
   -> Maybe UserAgent

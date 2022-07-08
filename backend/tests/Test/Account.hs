@@ -21,7 +21,6 @@ import Test.Hspec (expectationFailure, shouldBe, shouldThrow)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (assertBool, testCase)
 
-import Core.Jwt (JwtToken(..))
 import Core.Sender (ConfirmationCode(..), Phone(..))
 import Union.Account.Schema (Account(..))
 import Union.Account.Server (AccountEndpoints(..))
@@ -33,6 +32,7 @@ import Union.Account.SignIn.Types
   (AuthenticateReq(..), AuthenticateResp(..), RequestCodeReq(..))
 import Union.App.Db (executeS, selectOne)
 import Union.App.Env (Env)
+import Union.Auth (mkJwtToken, unJwtToken)
 import Union.Server (Endpoints(..))
 
 import Test.Mock (MockApp, apiStatusCode, rootClient, runMockApp, withClient)
@@ -111,7 +111,7 @@ signInTests env = testGroup
     AuthenticateResp {..} <- withClient
       env
       (_authenticate signInClient Nothing req2)
-    a_respToken `shouldBe` JwtToken (getJwtToken a_respToken)
+    a_respToken `shouldBe` mkJwtToken (unJwtToken a_respToken)
   --
   , testCase "`../signIn POST` creates auth log entry" $ do
     let

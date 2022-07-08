@@ -24,3 +24,8 @@ extra-deps:
   - run-st-0.1.1.0
   - typerep-map-0.5.0.0
   - zigzag-0.0.1.0
+  # Delete it when servant-auth-server will release new version
+  - git: https://github.com/haskell-servant/servant.git
+    commit: 3006e90126c3bed740ef2aa368586837f18b459f
+    subdirs:
+      - servant-auth/servant-auth-server

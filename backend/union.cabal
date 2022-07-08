@@ -33,7 +33,6 @@ library
       Core.Error
       Core.Has
       Core.Json
-      Core.Jwt
       Core.Logger
       Core.Measure
       Core.Monad
@@ -57,6 +56,7 @@ library
       Union.App.Db
       Union.App.Env
       Union.App.Error
+      Union.Auth
       Union.Middleware
       Union.Server
   other-modules:
@@ -130,9 +130,8 @@ library
     , hasql-migration
     , hasql-pool
     , hasql-transaction
-    , http-api-data
     , http-types
-    , jwt
+    , jose
     , lens
     , mtl
     , network
@@ -146,8 +145,8 @@ library
     , relude >=1.0
     , req
     , safe-exceptions
-    , scientific
     , servant
+    , servant-auth-server
     , servant-openapi3
     , servant-server
     , servant-swagger-ui
@@ -231,7 +230,6 @@ test-suite union-tests
       Test.Account
       Test.Arbitrary
       Test.Gen
-      Test.Jwt
       Test.Mock
       Test.Swagger
       Paths_union
@@ -294,8 +292,6 @@ test-suite union-tests
     , hspec
     , http-client
     , http-types
-    , jwt
-    , mmorph
     , process
     , quickcheck-instances
     , rel8
@@ -305,7 +301,6 @@ test-suite union-tests
     , servant-openapi3
     , servant-server
     , tasty
-    , tasty-hedgehog
     , tasty-hspec
     , tasty-hunit
     , union

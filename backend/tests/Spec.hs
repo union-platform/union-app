@@ -7,7 +7,6 @@ import Relude
 import Test.Tasty (defaultMain, testGroup)
 
 import Test.Account (accountTests)
-import Test.Jwt (jwtTests)
 import Test.Mock (initMockApp, mockEnv)
 import Test.Swagger (swaggerTests)
 
@@ -18,5 +17,4 @@ main = do
   initMockApp env
 
   swagger <- swaggerTests
-  defaultMain
-    $ testGroup "Union tests" [swagger, jwtTests env, accountTests env]
+  defaultMain $ testGroup "Union tests" [swagger, accountTests env]

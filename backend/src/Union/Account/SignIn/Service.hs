@@ -21,9 +21,7 @@ import Rel8.Expr.Time (addTime, now, seconds)
 
 import qualified Core
 
-import Core.Db (Id, getId)
 import Core.Error (throwError)
-import Core.Jwt (JwtPayload(..), JwtToken)
 import Core.Logger (Severity(..), logDebug)
 import Core.Sender (ConfirmationCode)
 
@@ -36,17 +34,11 @@ import Union.Account.SignIn.Schema
   , confirmationSchema
   )
 import Union.Account.SignIn.Types (UserAgent)
-import Union.App.Configuration (Config(cJwtExpire))
 import Union.App.Db (executeS, selectExists, selectOne)
-import Union.App.Env (Env, WithDb, WithError, WithJwt, WithLog, WithSender)
+import Union.App.Env (WithDb, WithError, WithLog, WithSender)
 import Union.App.Error (Error(..))
+import Union.Auth (JwtToken, generateJwtToken)
 
-
--- | Generates 'JwtToken' by given 'JwtPayload'.
-generateJwtToken :: (MonadReader Env m, WithJwt m) => Id a -> m JwtToken
-generateJwtToken identifier = do
-  expire <- Core.grab @Config
-  Core.mkJwtToken (cJwtExpire expire) (JwtPayload $ getId identifier)
 
 -- | Query to check whether provided code is valid.
 checkCode
@@ -106,7 +98,7 @@ sendConfirmationCode scope Account { aAccountId, aPhone } = do
 
 -- | Generates JWT token and records sign in.
 signIn
-  :: (WithDb m, WithError m, WithLog m, WithJwt m)
+  :: (WithDb m, WithError m, WithLog m)
   => Account Result
   -> ConfirmationCode
   -> SockAddr

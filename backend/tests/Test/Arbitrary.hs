@@ -13,17 +13,19 @@ import Relude
 import Test.QuickCheck (Arbitrary(..))
 import Test.QuickCheck.Instances ()
 
-import Core.Jwt (JwtToken(..))
 import Core.Sender (ConfirmationCode(..), Phone(..))
 import Union.Account.Profile.Types (CreateProfileReq(..))
 import Union.Account.SignIn.Types
   (AuthenticateReq(..), AuthenticateResp(..), RequestCodeReq(..), UserAgent(..))
+import Union.Auth (JwtToken, mkJwtToken)
 
 
 deriving newtype instance Arbitrary Phone
 deriving newtype instance Arbitrary ConfirmationCode
-deriving newtype instance Arbitrary JwtToken
 deriving newtype instance Arbitrary UserAgent
+
+instance Arbitrary JwtToken where
+  arbitrary = mkJwtToken <$> arbitrary
 
 instance Arbitrary RequestCodeReq where
   arbitrary = RequestCodeReq <$> arbitrary

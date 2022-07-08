@@ -14,9 +14,6 @@ module Core
     --environment data type.
   , module Core.Json
     -- "Core.Json" provides tools to work with JSON.
-  , module Core.Jwt
-    -- "Core.Jwt" provides convenient wrappers around JWT provided by the @jwt@
-    -- library.
   , module Core.Logger
     -- "Core.Logger" provides logging functionality.
   , module Core.Measure
@@ -39,7 +36,6 @@ import Core.Db
 import Core.Error
 import Core.Has
 import Core.Json
-import Core.Jwt
 import Core.Logger
 import Core.Measure
 import Core.Monad
