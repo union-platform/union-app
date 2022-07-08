@@ -13,15 +13,13 @@ import Relude
 
 import Rel8 (Column, Name, Rel8able, Result, TableSchema(..))
 
-import Core.Db (Id)
-
-import Union.Account.Schema (Account)
+import Union.Account.Schema (AccountId)
 import Union.Account.Profile.Types (UserName)
 
 
 -- | User's profile.
 data Profile f = Profile
-  { pAccountId :: Column f (Id Account)
+  { pAccountId :: Column f AccountId
   , pName      :: Column f UserName
   }
   deriving stock Generic

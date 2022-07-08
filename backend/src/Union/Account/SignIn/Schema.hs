@@ -22,10 +22,9 @@ import Data.Time.Clock (UTCTime)
 import Rel8
   (Column, DBEnum(..), DBEq, DBType, Name, Rel8able, Result, TableSchema(..))
 
-import Core.Db (Id)
 import Core.Sender (ConfirmationCode)
 
-import Union.Account.Schema (Account)
+import Union.Account.Schema (AccountId)
 import Union.Account.SignIn.Types (UserAgent)
 
 
@@ -39,7 +38,7 @@ instance DBEnum ConfirmationScope where
 
 -- | Confirmation code.
 data Confirmation f = Confirmation
-  { cAccountId :: Column f (Id Account)
+  { cAccountId :: Column f AccountId
   , cScope     :: Column f ConfirmationScope
   , cCode      :: Column f ConfirmationCode
   , cCreatedAt :: Column f UTCTime
@@ -69,7 +68,7 @@ confirmationSchema = TableSchema
 
 -- | Auth log.
 data AuthLog f = AuthLog
-  { alAccountId :: Column f (Id Account)
+  { alAccountId :: Column f AccountId
   , alCode      :: Column f ConfirmationCode
   , alIp        :: Column f Text
   , alClient    :: Column f (Maybe UserAgent)

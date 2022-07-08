@@ -27,7 +27,7 @@ import Core.Jwt (JwtPayload(..), JwtToken)
 import Core.Logger (Severity(..), logDebug)
 import Core.Sender (ConfirmationCode)
 
-import Union.Account.Schema (Account(..), accountSchema)
+import Union.Account.Schema (Account(..), AccountId, accountSchema)
 import Union.Account.SignIn.Schema
   ( AuthLog(..)
   , Confirmation(..)
@@ -51,7 +51,7 @@ generateJwtToken identifier = do
 -- | Query to check whether provided code is valid.
 checkCode
   :: ConfirmationScope
-  -> Id Account
+  -> AccountId
   -> Maybe ConfirmationCode
   -> Query (Confirmation Expr)
 checkCode scope accountId code = do

@@ -17,12 +17,11 @@ import Hasql.Statement (Statement)
 import Rel8 ((==.), Expr, Result)
 import Rel8.Expr.Time (now)
 
-import Core.Db (Id)
 import Core.Error (throwError)
 import Core.Logger (Severity(..))
 import Core.Sender (Phone)
 
-import Union.Account.Schema (Account(..), accountSchema)
+import Union.Account.Schema (Account(..), AccountId, accountSchema)
 import Union.App.Db (executeS, nextId, selectOne)
 import Union.App.Env (WithDb, WithError)
 import Union.App.Error (Error(..))
@@ -46,7 +45,7 @@ createAccount phone = do
       { into       = accountSchema
       , rows       = Sql.values
         [ Account
-            { aAccountId   = nextId "account_account_id" :: Expr (Id Account)
+            { aAccountId   = nextId "account_account_id" :: Expr AccountId
             , aPhone       = Sql.lit phone
             , aCreatedAt   = now
             , aActivatedAt = Sql.null

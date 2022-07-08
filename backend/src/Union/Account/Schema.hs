@@ -6,22 +6,25 @@
 module Union.Account.Schema
   ( -- * Account
     Account(..)
+  , AccountId
   , accountSchema
   ) where
 
 import Relude
 
 import Data.Time.Clock (UTCTime)
-import Rel8
-  (Column, Name, Rel8able, Result, TableSchema(..))
+import Rel8 (Column, Name, Rel8able, Result, TableSchema(..))
 
 import Core.Db (Id)
 import Core.Sender (Phone)
 
 
+-- | Account identifier.
+type AccountId = Id Account
+
 -- | Simple account (without profile).
 data Account f = Account
-  { aAccountId   :: Column f (Id Account)
+  { aAccountId   :: Column f AccountId
   , aPhone       :: Column f Phone
   , aCreatedAt   :: Column f UTCTime
   , aActivatedAt :: Column f (Maybe UTCTime)
