@@ -296,6 +296,7 @@ test-suite union-tests
     , quickcheck-instances
     , rel8
     , relude >=1.0
+    , servant-auth-client
     , servant-client
     , servant-client-core
     , servant-openapi3

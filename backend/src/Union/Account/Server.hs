@@ -18,6 +18,7 @@ import Servant.API.Generic ((:-))
 import Union.Account.Profile.Server (ProfileAPI, profileEndpoints)
 import Union.Account.SignIn.Server (SignInAPI, signInEndpoints)
 import Union.App.Env (Union)
+import Union.Auth (Protected, protected)
 
 
 -- | Helper type to represent Account API in terms of Servant.
@@ -26,11 +27,13 @@ type AccountAPI = "accounts" :> NamedRoutes AccountEndpoints
 -- | Represents API related to account.
 data AccountEndpoints mode = AccountEndpoints
   { _signIn  :: mode :- SignInAPI
-  , _profile :: mode :- ProfileAPI
+  , _profile :: mode :- Protected :> ProfileAPI
   }
   deriving stock Generic
 
 -- | Endpoints related to account.
 accountEndpoints :: AccountEndpoints Union
-accountEndpoints =
-  AccountEndpoints { _signIn = signInEndpoints, _profile = profileEndpoints }
+accountEndpoints = AccountEndpoints
+  { _signIn  = signInEndpoints
+  , _profile = protected profileEndpoints
+  }

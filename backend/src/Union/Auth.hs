@@ -12,23 +12,57 @@ module Union.Auth
   , unJwtToken
   , generateJwtToken
   , generateKey
+
+  -- * API protection
+  , authProxy
+  , authCtx
+  , Protected
+  , protected
   ) where
 
 import Relude
 
+import Control.Lens ((.~), (?~), At(..), Iso', coerced)
 import Data.Aeson (FromJSON, ToJSON)
-import Data.OpenApi (ToParamSchema, ToSchema)
+import Data.OpenApi
+  ( Definitions
+  , HasComponents(..)
+  , HasDescription(..)
+  , HasSecurity(..)
+  , HasSecuritySchemes(..)
+  , HttpSchemeType(..)
+  , SecurityDefinitions(..)
+  , SecurityRequirement(..)
+  , SecurityScheme(..)
+  , SecuritySchemeType(..)
+  , ToParamSchema
+  , ToSchema
+  , allOperations
+  , setResponse
+  )
 import Data.Time (getCurrentTime)
-import Servant.API (FromHttpApiData)
-import Servant.Auth.Server (JWTSettings(..), generateKey, makeJWT)
+import Servant.API (type (:>), FromHttpApiData)
+import Servant.Auth.Server
+  ( Auth
+  , AuthResult(..)
+  , CookieSettings
+  , JWT
+  , JWTSettings(..)
+  , defaultCookieSettings
+  , generateKey
+  , makeJWT
+  )
+import Servant.OpenApi (HasOpenApi(..))
+import Servant.Server (Context(..))
 
 import qualified Core
 
+import Core.Error (ThrowAll(..))
 import Core.Logger (Severity(..))
 
 import Union.Account.Schema (AccountId)
 import Union.App.Configuration (Config(..))
-import Union.App.Env (WithEnv, WithError)
+import Union.App.Env (Env(..), WithEnv, WithError)
 import Union.App.Error (Error(..))
 
 
@@ -59,3 +93,46 @@ generateJwtToken aId = do
   liftIO (makeJWT aId settings expireAt) >>= \case
     Right token -> pure $ mkJwtToken token
     Left  e     -> Core.throwError Info . ApiError $ show e
+
+-- | Proxy required for 'hoistServerWithContext' to protect API.
+authProxy :: Proxy '[CookieSettings , JWTSettings]
+authProxy = Proxy
+{-# INLINE authProxy #-}
+
+-- | Context required for 'serveWithContext' to protect API.
+authCtx :: Env -> Context '[CookieSettings, JWTSettings]
+authCtx env = defaultCookieSettings :. eJwtSettings env :. EmptyContext
+{-# INLINE authCtx #-}
+
+-- | Helper type to mark API is protected with authentication.
+type Protected = Auth '[JWT] AccountId
+
+-- | For the endpoints which actually require authentication, checks whether
+-- the request provides a valid authentication token.
+-- Otherwise it returns a 401 response
+protected
+  :: ThrowAll Error handler
+  => (AccountId -> handler)
+  -> AuthResult AccountId
+  -> handler
+protected handler = \case
+  (Authenticated aId) -> handler aId
+  _                   -> throwAll Info $ NotAllowed "Authorization failed"
+
+instance HasOpenApi api => HasOpenApi (Protected :> api) where
+  toOpenApi _ =
+    toOpenApi @api Proxy
+      & (components . securitySchemes . securityDefinitions . at "JWT" ?~ idJWT)
+      & (  allOperations
+        .  security
+        .~ [SecurityRequirement $ mempty & at "JWT" ?~ []]
+        )
+      & setResponse 401 (pure $ mempty & description .~ "Authorization failed")
+    where
+      idJWT = SecurityScheme
+        (SecuritySchemeHttp . HttpSchemeBearer $ Just "jwt")
+        (Just "JSON Web Token-based API key")
+
+securityDefinitions :: Iso' SecurityDefinitions (Definitions SecurityScheme)
+securityDefinitions = coerced
+{-# INLINE securityDefinitions #-}

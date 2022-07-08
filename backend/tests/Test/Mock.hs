@@ -20,6 +20,7 @@ import Data.Default (def)
 import Network.HTTP.Client (defaultManagerSettings, newManager)
 import Network.HTTP.Types (Status)
 import Network.Wai.Handler.Warp (testWithApplication)
+import Servant.Auth.Client ()
 import Servant.Client
   ( BaseUrl(..)
   , ClientError(..)
@@ -31,7 +32,7 @@ import Servant.Client
   )
 import Servant.Client.Core (RunClient)
 import Servant.Client.Generic (AsClientT, genericClient)
-import Servant.Server (Application, serve)
+import Servant.Server (Application, serveWithContext)
 import System.Process (readProcess)
 
 import qualified Core
@@ -45,7 +46,7 @@ import Union.App.Configuration
 import Union.App.Db (runDb)
 import Union.App.Env (Env(..))
 import Union.App.Error (Error)
-import Union.Auth (generateKey)
+import Union.Auth (authCtx, generateKey)
 import Union.Server (Endpoints, api, server)
 
 
@@ -80,7 +81,7 @@ initMockApp env = runApp env $ do
   void . runDb . Core.migrate $ dcMigrations cDatabase
 
 mockApplication :: Env -> Application
-mockApplication = serve api . server
+mockApplication env = serveWithContext api (authCtx env) $ server env
 
 -- | Creating a new Manager is a relatively expensive operation, so we will try
 -- share a single Manager between tests.

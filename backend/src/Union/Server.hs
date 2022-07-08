@@ -22,7 +22,8 @@ import Data.Version (showVersion)
 import Servant.API (type (:<|>)((:<|>)), NamedRoutes)
 import Servant.API.Generic ((:-))
 import Servant.OpenApi (HasOpenApi(..))
-import Servant.Server (Application, Handler, Server, hoistServer, serve)
+import Servant.Server
+  (Application, Handler, Server, hoistServerWithContext, serveWithContext)
 import Servant.Swagger.UI (SwaggerSchemaUI, swaggerSchemaUIServer)
 
 import qualified Paths_union as Meta
@@ -31,18 +32,21 @@ import Core.Monad (runAppLogIO)
 import Core.Swagger (WithSwagger)
 
 import Union.Account.Server (AccountAPI, accountEndpoints)
-import Union.App.Env (App, Env, Union)
+import Union.App.Env (App, Env(..), Union)
 import Union.App.Error (toHttpError)
+import Union.Auth (authCtx, authProxy)
 
 
 -- | Union web application
 application :: Env -> Application
 application env =
-  serve @(WithSwagger "docs" API) Proxy $ server env :<|> swagger
+  serveWithContext @(WithSwagger "docs" API) Proxy (authCtx env)
+    $    server env
+    :<|> swagger
 
 -- | Union web server.
 server :: Env -> Server API
-server env = hoistServer api toHandler endpoints
+server env = hoistServerWithContext api authProxy toHandler endpoints
   where
     toHandler :: App a -> Handler a
     toHandler app =

@@ -225,6 +225,7 @@ tests:
       - http-types
       - process
       - rel8
+      - servant-auth-client
       - servant-client
       - servant-client-core
       - servant-openapi3

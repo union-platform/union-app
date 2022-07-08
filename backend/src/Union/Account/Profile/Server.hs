@@ -20,6 +20,7 @@ import Core.Error (throwOnNothing)
 import Core.Logger (Severity(..))
 
 import Union.Account.Profile.Types (CreateProfileReq(..), mkUserName)
+import Union.Account.Schema (AccountId)
 import Union.App.Env (Union, WithError, WithLog)
 import Union.App.Error (Error(..))
 
@@ -41,15 +42,15 @@ newtype ProfileEndpoints mode = ProfileEndpoints
   } deriving stock (Generic)
 
 -- | Endpoints related to profile.
-profileEndpoints :: ProfileEndpoints Union
-profileEndpoints = ProfileEndpoints { _createProfile = createProfileHandler }
+profileEndpoints :: AccountId -> ProfileEndpoints Union
+profileEndpoints aId =
+  ProfileEndpoints { _createProfile = createProfileHandler aId }
 
 
 -- | Handler to create profile.
 createProfileHandler
-  :: (WithLog m, WithError m) => CreateProfileReq -> m NoContent
-createProfileHandler CreateProfileReq {..} = do
+  :: (WithLog m, WithError m) => AccountId -> CreateProfileReq -> m NoContent
+createProfileHandler _aId CreateProfileReq {..} = do
   _name <- throwOnNothing Info (BadRequest "Provided name is not valid")
     $ mkUserName cp_reqName
-  -- TODO: add actual service
   pure NoContent
