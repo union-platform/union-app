@@ -7,11 +7,20 @@ module Union.Account.Profile.Schema
   ( -- * Profile
     Profile(..)
   , profileSchema
+
+    -- * Interest
+  , Interest (..)
+  , InterestId
+  , interestSchema
+  , InterestMap (..)
+  , interestMapSchema
   ) where
 
 import Relude
 
 import Rel8 (Column, Name, Rel8able, Result, TableSchema(..))
+
+import Core.Db (Id)
 
 import Union.Account.Types (UserName)
 import Union.Account.Schema (AccountId)
@@ -33,4 +42,47 @@ profileSchema = TableSchema
   { name    = "profile"
   , schema  = Nothing
   , columns = Profile { pAccountId = "account_id", pName = "name" }
+  }
+
+
+-- | Interest identifier.
+type InterestId = Id Interest
+
+-- | Interests.
+data Interest f = Interest
+  { iInterestId :: Column f InterestId
+  , iName       :: Column f Text
+  }
+  deriving stock Generic
+  deriving anyclass Rel8able
+
+deriving stock instance f ~ Result => Show (Interest f)
+
+-- | Schema to represent 'Interest' in Database.
+interestSchema :: TableSchema (Interest Name)
+interestSchema = TableSchema
+  { name    = "interest"
+  , schema  = Nothing
+  , columns = Interest { iInterestId = "interest_id", iName = "name" }
+  }
+
+-- | Map between 'Interest' and 'Account'.
+data InterestMap f = InterestMap
+  { imInterestId :: Column f InterestId
+  , imAccountId  :: Column f AccountId
+  }
+  deriving stock Generic
+  deriving anyclass Rel8able
+
+deriving stock instance f ~ Result => Show (InterestMap f)
+
+-- | Schema to represent 'InterestMap' in Database.
+interestMapSchema :: TableSchema (InterestMap Name)
+interestMapSchema = TableSchema
+  { name    = "interest_map"
+  , schema  = Nothing
+  , columns = InterestMap
+    { imInterestId = "interest_id"
+    , imAccountId  = "account_id"
+    }
   }
