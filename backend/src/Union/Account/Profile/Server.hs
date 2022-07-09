@@ -16,12 +16,13 @@ import Servant.API
   (Description, NamedRoutes, NoContent(..), PostCreated, Summary)
 import Servant.API.Generic ((:-))
 
-import Core.Error (throwOnNothing)
+import Core.Error (throwError, throwOnNothing)
 import Core.Logger (Severity(..))
 
+import Union.Account.Profile.Service (createProfile, findProfile)
 import Union.Account.Profile.Types (CreateProfileReq(..), mkUserName)
 import Union.Account.Schema (AccountId)
-import Union.App.Env (Union, WithError, WithLog)
+import Union.App.Env (Union, WithDb, WithError, WithLog)
 import Union.App.Error (Error(..))
 
 
@@ -49,8 +50,14 @@ profileEndpoints aId =
 
 -- | Handler to create profile.
 createProfileHandler
-  :: (WithLog m, WithError m) => AccountId -> CreateProfileReq -> m NoContent
-createProfileHandler _aId CreateProfileReq {..} = do
-  _name <- throwOnNothing Info (BadRequest "Provided name is not valid")
+  :: (WithLog m, WithError m, WithDb m)
+  => AccountId
+  -> CreateProfileReq
+  -> m NoContent
+createProfileHandler aId CreateProfileReq {..} = do
+  name <- throwOnNothing Info (Invalid "Provided name is not valid")
     $ mkUserName cp_reqName
-  pure NoContent
+  findProfile aId >>= \case
+    Just _ -> throwError Info
+      $ BadRequest ("Profile for user " <> show aId <> " already exists")
+    Nothing -> createProfile aId name >> pure NoContent

@@ -44,6 +44,7 @@ library
       Union
       Union.Account.Profile.Schema
       Union.Account.Profile.Server
+      Union.Account.Profile.Service
       Union.Account.Profile.Types
       Union.Account.Schema
       Union.Account.Server

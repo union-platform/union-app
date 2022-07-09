@@ -12,19 +12,24 @@ import Relude
 import qualified Rel8 as Sql
 
 import Network.HTTP.Types.Status
-  (badRequest400, tooManyRequests429, unauthorized401)
+  (badRequest400, expectationFailed417, tooManyRequests429, unauthorized401)
 import Rel8 ((==.), Result)
+import Servant.Auth.Client (Token(..))
 import Servant.Client.Core (RunClient)
 import Servant.Client.Core.HasClient ((//))
 import Servant.Client.Generic (AsClientT)
 import Test.Hspec (expectationFailure, shouldBe, shouldThrow)
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (assertBool, testCase)
+import Test.Tasty.HUnit (assertBool, testCase, testCaseSteps)
 
 import Core.Sender (ConfirmationCode(..), Phone(..))
-import Union.Account.Schema (Account(..))
+import Union.Account.Profile.Schema (Profile(..))
+import Union.Account.Profile.Server (ProfileEndpoints(..))
+import Union.Account.Profile.Service (findProfile)
+import Union.Account.Profile.Types (CreateProfileReq(..), mkUserName)
+import Union.Account.Schema (Account(..), AccountId)
 import Union.Account.Server (AccountEndpoints(..))
-import Union.Account.Service (findAccount)
+import Union.Account.Service (createAccount, findAccount)
 import Union.Account.SignIn.Schema
   (AuthLog(..), Confirmation(..), authLogSchema, confirmationSchema)
 import Union.Account.SignIn.Server (SignInEndpoints(..))
@@ -32,7 +37,7 @@ import Union.Account.SignIn.Types
   (AuthenticateReq(..), AuthenticateResp(..), RequestCodeReq(..))
 import Union.App.Db (executeS, selectOne)
 import Union.App.Env (Env)
-import Union.Auth (mkJwtToken, unJwtToken)
+import Union.Auth (generateJwtToken, mkJwtToken, unJwtToken)
 import Union.Server (Endpoints(..))
 
 import Test.Mock (MockApp, apiStatusCode, rootClient, runMockApp, withClient)
@@ -42,7 +47,8 @@ accountClient :: RunClient m => AccountEndpoints (AsClientT m)
 accountClient = rootClient // eAccount
 
 accountTests :: Env -> TestTree
-accountTests env = testGroup "Account API ../accounts" [signInTests env]
+accountTests env =
+  testGroup "Account API ../accounts" [signInTests env, profileTests env]
 
 signInTests :: Env -> TestTree
 signInTests env = testGroup
@@ -131,6 +137,67 @@ signInTests env = testGroup
   where
     signInClient :: RunClient m => SignInEndpoints (AsClientT m)
     signInClient = accountClient // _signIn
+
+profileTests :: Env -> TestTree
+profileTests env = testGroup
+  "Profile API"
+  [ testCaseSteps "`../profile POST` throws error for invalid name" $ \step ->
+    do
+      step "Preparing..."
+      (_, token) <- mkToken $ Phone "profile1"
+
+      let
+        names =
+          [ -- name should be at least 4 symbols
+            "abc"
+            -- name should be at most 32 symbols
+          , "abc abc abc abc abc abc abc abc abc abc abc abc abc"
+            -- name cannot contain digits
+          , "abc 8"
+            -- name cannot contain special symbols
+          , "abc %"
+          ]
+
+      step "Running..."
+      forM_ names $ \name ->
+        withClient
+            env
+            (_createProfile (profileClient token) $ CreateProfileReq name)
+          `shouldThrow` apiStatusCode expectationFailed417
+  --
+  , testCaseSteps "`../profile POST` creates profile for account" $ \step -> do
+    step "Preparing..."
+    (aId, token) <- mkToken $ Phone "profile2"
+    let
+      name = "Lev Tolstoy"
+      req  = CreateProfileReq name
+
+    step "Running..."
+    void $ withClient env (_createProfile (profileClient token) req)
+    runMockApp env $ findProfile aId >>= \case
+      Nothing -> liftIO $ expectationFailure "Cannot find profile in DB"
+      Just Profile {..} -> liftIO $ Just pName `shouldBe` mkUserName name
+  --
+  , testCaseSteps "`../profile POST` throws error for existing profile"
+    $ \step -> do
+        step "Preparing..."
+        (_, token) <- mkToken $ Phone "profile3"
+        let req = CreateProfileReq "Vasya"
+        void $ withClient env (_createProfile (profileClient token) req)
+
+        step "Running..."
+        withClient env (_createProfile (profileClient token) req)
+          `shouldThrow` apiStatusCode badRequest400
+        assertBool "True" True
+  ]
+  where
+    profileClient :: RunClient m => Token -> ProfileEndpoints (AsClientT m)
+    profileClient = accountClient // _profile
+
+    mkToken :: Phone -> IO (AccountId, Token)
+    mkToken phone = runMockApp env $ do
+      aId <- aAccountId <$> createAccount phone
+      (aId, ) . Token . toStrict . unJwtToken <$> generateJwtToken aId
 
 
 -- | Helper to find 'ConfirmationCode' in DB.
