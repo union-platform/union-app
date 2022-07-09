@@ -10,4 +10,4 @@ database:
   migrations: "./migrations"
 severity: debug
 jwtExpire: 86400
-senderPhone: "+18592975563"
+senderPhone: "+12562861498"
