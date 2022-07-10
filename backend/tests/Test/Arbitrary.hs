@@ -13,13 +13,18 @@ import Relude
 import Test.QuickCheck (Arbitrary(..))
 import Test.QuickCheck.Instances ()
 
+import Core.Db (Id(..))
 import Core.Sender (ConfirmationCode(..), Phone(..))
-import Union.Account.Profile.Types (CreateProfileReq(..))
+import Union.Account.Profile.Schema (Interest(..))
+import Union.Account.Profile.Types
+  (CreateInterestReq(..), CreateProfileReq(..), UpdateInterestsReq(..))
 import Union.Account.SignIn.Types
   (AuthenticateReq(..), AuthenticateResp(..), RequestCodeReq(..), UserAgent(..))
 import Union.Auth (JwtToken, mkJwtToken)
+import Union.Search.Types (SuggestInterestsResp(..))
 
 
+deriving newtype instance Arbitrary (Id a)
 deriving newtype instance Arbitrary Phone
 deriving newtype instance Arbitrary ConfirmationCode
 deriving newtype instance Arbitrary UserAgent
@@ -38,3 +43,15 @@ instance Arbitrary AuthenticateResp where
 
 instance Arbitrary CreateProfileReq where
   arbitrary = CreateProfileReq <$> arbitrary
+
+instance Arbitrary CreateInterestReq where
+  arbitrary = CreateInterestReq <$> arbitrary
+
+instance Arbitrary UpdateInterestsReq where
+  arbitrary = UpdateInterestsReq <$> arbitrary
+
+instance f ~ Identity => Arbitrary (Interest f) where
+  arbitrary = Interest <$> arbitrary <*> arbitrary
+
+instance Arbitrary SuggestInterestsResp where
+  arbitrary = SuggestInterestsResp <$> arbitrary

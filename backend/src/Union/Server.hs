@@ -19,6 +19,7 @@ import qualified Servant.OpenApi as O
 import Control.Lens ((.~), (?~))
 import Control.Monad.Except (liftEither)
 import Data.Version (showVersion)
+import Servant ((:>))
 import Servant.API (type (:<|>)((:<|>)), NamedRoutes)
 import Servant.API.Generic ((:-))
 import Servant.OpenApi (HasOpenApi(..))
@@ -34,7 +35,8 @@ import Core.Swagger (WithSwagger)
 import Union.Account.Server (AccountAPI, accountEndpoints)
 import Union.App.Env (App, Env(..), Union)
 import Union.App.Error (toHttpError)
-import Union.Auth (authCtx, authProxy)
+import Union.Auth (Protected, authCtx, authProxy, protected)
+import Union.Search.Server (SearchAPI, searchEndpoints)
 
 
 -- | Union web application
@@ -53,14 +55,16 @@ server env = hoistServerWithContext api authProxy toHandler endpoints
       liftIO (runAppLogIO env app) >>= liftEither . first toHttpError
 
 -- | Represents combination of all endpoints, available in Union.
-newtype Endpoints mode = Endpoints
+data Endpoints mode = Endpoints
   { eAccount :: mode :- AccountAPI
+  , eSearch  :: mode :- Protected :> SearchAPI
   }
   deriving stock Generic
 
 -- | Represents combination of all endpoints, available in Union.
 endpoints :: Endpoints Union
-endpoints = Endpoints { eAccount = accountEndpoints }
+endpoints =
+  Endpoints { eAccount = accountEndpoints, eSearch = protected searchEndpoints }
 
 -- | Helper type to represent Union API in terms of Servant.
 type API = NamedRoutes Endpoints
@@ -93,3 +97,6 @@ swagger =
          )
        )
     &  O.applyTagsFor (O.subOperations @AccountAPI Proxy api) ["Account"]
+    &  O.applyTagsFor
+         (O.subOperations @(Protected :> SearchAPI) Proxy api)
+         ["Search"]

@@ -6,6 +6,8 @@
 -- mostly here is helper types for API.
 module Union.Account.Profile.Types
   ( CreateProfileReq(..)
+  , CreateInterestReq(..)
+  , UpdateInterestsReq(..)
   ) where
 
 import Relude
@@ -20,6 +22,8 @@ import Deriving.Aeson (CustomJSON(..))
 
 import Core.Json (JsonCamelCase)
 import Core.Swagger (genericNamedSchema)
+
+import Union.Account.Profile.Schema (InterestId)
 
 
 -- | Create 'Profile' request.
@@ -37,3 +41,30 @@ instance ToSchema CreateProfileReq where
           (CreateProfileReq "Lev Tolstoy")
         , mapped . O.schema . O.description ?~ "Request to create user profile"
         ]
+
+
+-- | Create 'Interest' request.
+newtype CreateInterestReq = CreateInterestReq
+  { ci_reqName :: Text
+  }
+  deriving stock (Generic, Show, Eq)
+  deriving (FromJSON, ToJSON) via CustomJSON (JsonCamelCase "ci_req") CreateInterestReq
+
+instance ToSchema CreateInterestReq where
+  declareNamedSchema = genericNamedSchema @(JsonCamelCase "ci_req") extra
+    where
+      extra =
+        [ mapped . O.schema . O.example ?~ toJSON
+          (CreateInterestReq "Programming")
+        , mapped
+          .  O.schema
+          .  O.description
+          ?~ "Request to update user's interests"
+        ]
+
+-- | Update 'InterestMap' request.
+newtype UpdateInterestsReq = UpdateInterestsReq
+  { ui_reqInterests :: [InterestId]
+  }
+  deriving stock (Generic, Show, Eq)
+  deriving newtype (ToJSON, FromJSON, ToSchema)

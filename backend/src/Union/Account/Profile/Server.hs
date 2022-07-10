@@ -13,14 +13,15 @@ import Relude
 
 import Servant ((:>), JSON, ReqBody)
 import Servant.API
-  (Description, NamedRoutes, NoContent(..), PostCreated, Summary)
+  (Description, NamedRoutes, NoContent(..), PostCreated, Put, Summary)
 import Servant.API.Generic ((:-))
 
 import Core.Error (throwError, throwOnNothing)
 import Core.Logger (Severity(..))
 
 import Union.Account.Profile.Service (createProfile, findProfile)
-import Union.Account.Profile.Types (CreateProfileReq(..))
+import Union.Account.Profile.Types
+  (CreateInterestReq(..), CreateProfileReq(..), UpdateInterestsReq(..))
 import Union.Account.Schema (AccountId)
 import Union.Account.Types (mkUserName)
 import Union.App.Env (Union, WithDb, WithError, WithLog)
@@ -31,7 +32,7 @@ import Union.App.Error (Error(..))
 type ProfileAPI = NamedRoutes ProfileEndpoints
 
 -- | Represents API related to profile.
-newtype ProfileEndpoints mode = ProfileEndpoints
+data ProfileEndpoints mode = ProfileEndpoints
   { _createProfile :: mode
       :- "profile"
       :> Summary "Create profile"
@@ -41,15 +42,38 @@ newtype ProfileEndpoints mode = ProfileEndpoints
         \in profile we store actual information about user."
       :> ReqBody '[JSON] CreateProfileReq
       :> PostCreated '[JSON] NoContent
+  , _createInterest :: mode
+      :- "profile"
+      :> "interests"
+      :> Summary "Create interest"
+      :> Description
+        "Create new interest. It's not related to any account yet, but creates \
+        \new entry in database. We need it now to collect set of interests and \
+        \most likely we will delete this endpoint in future and allow to pick \
+        \from existing only."
+      :> ReqBody '[JSON] CreateInterestReq
+      :> PostCreated '[JSON] NoContent
+  , _updateInterests :: mode
+      :- "profile"
+      :> "interests"
+      :> Summary "Update interests"
+      :> Description
+        "Update user interests - whether he had it before or not you can use \
+        \this endpoint."
+      :> ReqBody '[JSON] UpdateInterestsReq
+      :> Put '[JSON] NoContent
   } deriving stock (Generic)
 
 -- | Endpoints related to profile.
 profileEndpoints :: AccountId -> ProfileEndpoints Union
-profileEndpoints aId =
-  ProfileEndpoints { _createProfile = createProfileHandler aId }
+profileEndpoints aId = ProfileEndpoints
+  { _createProfile   = createProfileHandler aId
+  , _createInterest  = createInterestHandler
+  , _updateInterests = updateInterestsHandler aId
+  }
 
 
--- | Handler to create profile.
+-- | Handler to create 'Profile'.
 createProfileHandler
   :: (WithLog m, WithError m, WithDb m)
   => AccountId
@@ -62,3 +86,15 @@ createProfileHandler aId CreateProfileReq {..} = do
     Just _ -> throwError Info
       $ BadRequest ("Profile for user " <> show aId <> " already exists")
     Nothing -> createProfile aId name >> pure NoContent
+
+-- | Handler to create 'Interest'.
+createInterestHandler :: Monad m => CreateInterestReq -> m NoContent
+createInterestHandler CreateInterestReq{} = do
+  pure NoContent
+
+
+-- | Handler to update 'InterestMap'.
+updateInterestsHandler
+  :: Monad m => AccountId -> UpdateInterestsReq -> m NoContent
+updateInterestsHandler _aId UpdateInterestsReq{} = do
+  pure NoContent

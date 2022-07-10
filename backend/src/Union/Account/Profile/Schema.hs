@@ -18,9 +18,17 @@ module Union.Account.Profile.Schema
 
 import Relude
 
-import Rel8 (Column, Name, Rel8able, Result, TableSchema(..))
+import qualified Data.OpenApi as O
 
-import Core.Db (Id)
+import Rel8 (Column, Name, Rel8able, Result, TableSchema(..))
+import Data.Aeson (ToJSON(..), FromJSON(..), genericToJSON, genericParseJSON)
+import Deriving.Aeson (AesonOptions (..))
+import Data.OpenApi (ToSchema (..))
+import Control.Lens ((?~), mapped)
+
+import Core.Db (Id (..))
+import Core.Json (JsonCamelCase)
+import Core.Swagger (genericNamedSchema)
 
 import Union.Account.Types (UserName)
 import Union.Account.Schema (AccountId)
@@ -57,6 +65,22 @@ data Interest f = Interest
   deriving anyclass Rel8able
 
 deriving stock instance f ~ Result => Show (Interest f)
+deriving stock instance f ~ Result => Eq   (Interest f)
+
+instance f ~ Result => FromJSON (Interest f) where
+  parseJSON = genericParseJSON $ aesonOptions @(JsonCamelCase "i")
+
+instance f ~ Result => ToJSON (Interest f) where
+  toJSON = genericToJSON $ aesonOptions @(JsonCamelCase "i")
+
+instance f ~ Result => ToSchema (Interest f) where
+  declareNamedSchema = genericNamedSchema @(JsonCamelCase "i") extra
+    where
+      extra =
+        [ mapped . O.schema . O.example ?~ toJSON
+          (Interest (Id 1) "Lev Tolstoy")
+        , mapped . O.schema . O.description ?~ "Interest"
+        ]
 
 -- | Schema to represent 'Interest' in Database.
 interestSchema :: TableSchema (Interest Name)

@@ -60,6 +60,8 @@ library
       Union.App.Error
       Union.Auth
       Union.Middleware
+      Union.Search.Server
+      Union.Search.Types
       Union.Server
   other-modules:
       Paths_union
