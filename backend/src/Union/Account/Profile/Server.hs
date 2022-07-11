@@ -20,8 +20,9 @@ import Core.Error (throwError, throwOnNothing)
 import Core.Logger (Severity(..))
 
 import Union.Account.Profile.Service (createProfile, findProfile)
-import Union.Account.Profile.Types (CreateProfileReq(..), mkUserName)
+import Union.Account.Profile.Types (CreateProfileReq(..))
 import Union.Account.Schema (AccountId)
+import Union.Account.Types (mkUserName)
 import Union.App.Env (Union, WithDb, WithError, WithLog)
 import Union.App.Error (Error(..))
 

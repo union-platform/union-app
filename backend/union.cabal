@@ -53,6 +53,7 @@ library
       Union.Account.SignIn.Server
       Union.Account.SignIn.Service
       Union.Account.SignIn.Types
+      Union.Account.Types
       Union.App.Configuration
       Union.App.Db
       Union.App.Env

@@ -13,8 +13,8 @@ import Relude
 
 import Rel8 (Column, Name, Rel8able, Result, TableSchema(..))
 
+import Union.Account.Types (UserName)
 import Union.Account.Schema (AccountId)
-import Union.Account.Profile.Types (UserName)
 
 
 -- | User's profile.
