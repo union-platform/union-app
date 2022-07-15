@@ -15,8 +15,9 @@ import Servant ((:>))
 import Servant.API (Description, Get, JSON, NamedRoutes, QueryParam, Summary)
 import Servant.API.Generic ((:-))
 
+import Union.Account.Profile.Service (searchInterests)
 import Union.Account.Schema (AccountId)
-import Union.App.Env (Union)
+import Union.App.Env (Union, WithDb, WithError)
 import Union.Search.Types (SuggestInterestsResp(..))
 
 
@@ -43,6 +44,6 @@ searchEndpoints _aId =
 
 
 -- | Handler to suggest 'Interest'.
-suggestInterestsHandler :: Monad m => Maybe Text -> m SuggestInterestsResp
-suggestInterestsHandler _q = do
-  pure $ SuggestInterestsResp []
+suggestInterestsHandler
+  :: (WithError m, WithDb m) => Maybe Text -> m SuggestInterestsResp
+suggestInterestsHandler q = searchInterests q <&> SuggestInterestsResp

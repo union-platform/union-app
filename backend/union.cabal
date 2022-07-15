@@ -235,6 +235,7 @@ test-suite union-tests
       Test.Arbitrary
       Test.Gen
       Test.Mock
+      Test.Search
       Test.Swagger
       Paths_union
   hs-source-dirs:

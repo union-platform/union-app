@@ -9,6 +9,7 @@ module Union.App.Db
   , selectOne
   , selectExists
   , nextId
+  , mkIlike
   , initDb
   , runDb
   ) where
@@ -61,6 +62,11 @@ selectExists = fmap (all (== True)) . select . exists
 nextId :: DBNum a => String -> Expr a
 nextId name = Sql.fromIntegral . Sql.nextval $ name <> "_seq"
 {-# INLINE nextId #-}
+
+-- | Helper to construct value for 'Sql.ilike' - it wrap's given text with `%`.
+mkIlike :: Text -> Expr Text
+mkIlike val = Sql.lit $ "%" <> val <> "%"
+{-# INLINE mkIlike #-}
 
 -- | Init DB with migrations.
 initDb

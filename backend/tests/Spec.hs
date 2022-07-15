@@ -8,6 +8,7 @@ import Test.Tasty (defaultMain, testGroup)
 
 import Test.Account (accountTests)
 import Test.Mock (initMockApp, mockEnv)
+import Test.Search (searchTests)
 import Test.Swagger (swaggerTests)
 
 
@@ -17,4 +18,5 @@ main = do
   initMockApp env
 
   swagger <- swaggerTests
-  defaultMain $ testGroup "Union tests" [swagger, accountTests env]
+  defaultMain
+    $ testGroup "Union tests" [swagger, accountTests env, searchTests env]

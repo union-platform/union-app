@@ -11,6 +11,7 @@ module Union.Account.Profile.Server
 
 import Relude
 
+import Rel8 (Result)
 import Servant ((:>), JSON, ReqBody)
 import Servant.API
   (Description, NamedRoutes, NoContent(..), PostCreated, Put, Summary)
@@ -19,7 +20,9 @@ import Servant.API.Generic ((:-))
 import Core.Error (throwError, throwOnNothing)
 import Core.Logger (Severity(..))
 
-import Union.Account.Profile.Service (createProfile, findProfile)
+import Union.Account.Profile.Schema (Interest)
+import Union.Account.Profile.Service
+  (createInterest, createProfile, findProfile, updateUserInterests)
 import Union.Account.Profile.Types
   (CreateInterestReq(..), CreateProfileReq(..), UpdateInterestsReq(..))
 import Union.Account.Schema (AccountId)
@@ -52,7 +55,7 @@ data ProfileEndpoints mode = ProfileEndpoints
         \most likely we will delete this endpoint in future and allow to pick \
         \from existing only."
       :> ReqBody '[JSON] CreateInterestReq
-      :> PostCreated '[JSON] NoContent
+      :> PostCreated '[JSON] (Interest Result)
   , _updateInterests :: mode
       :- "profile"
       :> "interests"
@@ -88,13 +91,12 @@ createProfileHandler aId CreateProfileReq {..} = do
     Nothing -> createProfile aId name >> pure NoContent
 
 -- | Handler to create 'Interest'.
-createInterestHandler :: Monad m => CreateInterestReq -> m NoContent
-createInterestHandler CreateInterestReq{} = do
-  pure NoContent
-
+createInterestHandler
+  :: (WithError m, WithDb m) => CreateInterestReq -> m (Interest Result)
+createInterestHandler CreateInterestReq {..} = createInterest ci_reqName
 
 -- | Handler to update 'InterestMap'.
 updateInterestsHandler
-  :: Monad m => AccountId -> UpdateInterestsReq -> m NoContent
-updateInterestsHandler _aId UpdateInterestsReq{} = do
-  pure NoContent
+  :: (WithError m, WithDb m) => AccountId -> UpdateInterestsReq -> m NoContent
+updateInterestsHandler aId UpdateInterestsReq {..} =
+  updateUserInterests aId ui_reqInterests >> pure NoContent

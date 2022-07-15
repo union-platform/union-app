@@ -11,6 +11,7 @@ module Test.Mock
   , withClient
   , rootClient
   , apiStatusCode
+  , mkToken
   ) where
 
 import Relude
@@ -20,7 +21,7 @@ import Data.Default (def)
 import Network.HTTP.Client (defaultManagerSettings, newManager)
 import Network.HTTP.Types (Status)
 import Network.Wai.Handler.Warp (testWithApplication)
-import Servant.Auth.Client ()
+import Servant.Auth.Client (Token(..))
 import Servant.Client
   ( BaseUrl(..)
   , ClientError(..)
@@ -40,13 +41,15 @@ import qualified Core
 import Core.Db (DbCredentials(..))
 import Core.Logger (emptyLogger)
 import Core.Monad (runApp)
-import Core.Sender (AuthToken(..), SenderAccount(..))
+import Core.Sender (AuthToken(..), Phone(..), SenderAccount(..))
+import Union.Account.Schema (Account(..), AccountId)
+import Union.Account.Service (createAccount)
 import Union.App.Configuration
   (Config(..), DatabaseConfig(..), jwtSettings, loadConfig)
 import Union.App.Db (runDb)
 import Union.App.Env (Env(..))
 import Union.App.Error (Error)
-import Union.Auth (authCtx, generateKey)
+import Union.Auth (authCtx, generateJwtToken, generateKey, unJwtToken)
 import Union.Server (Endpoints, api, server)
 
 
@@ -105,3 +108,9 @@ apiStatusCode :: Status -> ClientError -> Bool
 apiStatusCode status servantError = case servantError of
   FailureResponse _ response -> responseStatusCode response == status
   _                          -> False
+
+-- | Creates account with given 'Phone' and generates 'Token' for auth.
+mkToken :: Env -> Phone -> IO (AccountId, Token)
+mkToken env phone = runMockApp env $ do
+  aId <- aAccountId <$> createAccount phone
+  (aId, ) . Token . toStrict . unJwtToken <$> generateJwtToken aId
