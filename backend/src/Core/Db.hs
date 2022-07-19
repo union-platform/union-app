@@ -44,6 +44,8 @@ import Hasql.Statement (Statement)
 import Hasql.Transaction (Transaction, sql, statement)
 import Hasql.Transaction.Sessions (IsolationLevel(..), Mode(..), transaction)
 import Rel8 (DBEq, DBNum, DBType)
+import Servant.Auth.Server (FromJWT, ToJWT)
+import Data.OpenApi (ToSchema)
 
 import Core.Error (WithError, liftError)
 import Core.Has (Has, grab)
@@ -90,8 +92,9 @@ withPool action = do
 
 -- | Type to represent id in database.
 newtype Id a = Id { getId :: Int64 }
-  deriving stock Generic
-  deriving newtype (Show, Eq, DBType, DBEq, DBNum)
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass (FromJWT, ToJWT)
+  deriving newtype (FromJSON, ToJSON, ToSchema, DBType, DBEq, DBNum)
 
 -- | Runs 'Transaction' with 'DbPool'.
 runTransaction

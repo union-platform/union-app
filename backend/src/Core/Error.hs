@@ -18,6 +18,7 @@ module Core.Error
   , toNoSourceException
 
     -- * Helper functions
+  , ThrowAll(..)
   , toAppError
   , toLogMsg
   , throwOnNothing
@@ -32,9 +33,12 @@ import qualified Control.Monad.Except as E (catchError, liftEither, throwError)
 
 import Control.Monad.Except (MonadError)
 import GHC.Stack.Types (CallStack(EmptyCallStack))
+import Servant (type (:<|>)((:<|>)))
 import Text.Pretty.Simple (pShow)
+import Servant.API.Generic (ToServant, GenericServant, fromServant)
+import Servant.Server.Generic (AsServerT)
 
-import Core.Logger (Msg(..), Severity)
+import Core.Logger (Msg(..), Severity(..))
 
 
 -- | Type alias for errors that has access to 'CallStack'.
@@ -112,3 +116,29 @@ throwOnNothingM severity err action =
 showErr :: Show err => err -> Text
 showErr = toStrict . pShow
 {-# INLINE showErr #-}
+
+
+-- | We redefine this class from @servant-auth-server@ to work with our custom
+-- error type.
+class ThrowAll err a where
+  -- | 'throwAll' is a convenience function to throw errors across an entire
+  -- sub-API
+  --
+  -- > throwAll err400 :: Handler a :<|> Handler b :<|> Handler c
+  -- >    == throwError err400 :<|> throwError err400 :<|> err400
+  throwAll :: Severity -> err -> a
+
+instance (ThrowAll err a, ThrowAll err b) => ThrowAll err (a :<|> b) where
+  throwAll severity e = throwAll severity e :<|> throwAll severity e
+
+instance ThrowAll err b => ThrowAll err (a -> b) where
+  throwAll severity e = const $ throwAll severity e
+
+instance ( ThrowAll err (ToServant api (AsServerT m))
+         , GenericServant api (AsServerT m)
+         ) => ThrowAll err (api (AsServerT m)) where
+  throwAll severity = fromServant . throwAll severity
+
+instance {-# OVERLAPPABLE #-} (MonadError (ErrorWithSource err) m)
+  => ThrowAll err (m a) where
+  throwAll = throwError

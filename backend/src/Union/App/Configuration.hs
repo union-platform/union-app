@@ -10,16 +10,24 @@ module Union.App.Configuration
 
     -- * Tools
   , loadConfig
+  , jwtSettings
+  , buildJwtSettings
   ) where
 
 import Relude
 
+import qualified Control.Monad.Except as E (catchError)
+
+import Crypto.JOSE (Alg(..), JWK, JWKSet(..))
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Default (Default(..))
 import Data.Time.Clock (NominalDiffTime)
 import Data.Yaml.Config (ignoreEnv, loadYamlSettings)
 import Deriving.Aeson (CustomJSON(..))
+import GHC.IO.Exception (IOError)
 import Network.Wai.Handler.Warp (Port)
+import Servant.Auth.Server
+  (IsMatch(..), JWTSettings(..), fromSecret, generateSecret, readKey)
 
 import Core.Db (DbCredentials(..))
 import Core.Json (JsonCamelCase)
@@ -78,3 +86,21 @@ instance Default Config where
 -- | Helper to load config from yaml file.
 loadConfig :: FromJSON settings => FilePath -> IO settings
 loadConfig path = loadYamlSettings [path] [] ignoreEnv
+
+-- | A @JWTSettings@ where the audience always matches.
+jwtSettings :: JWK -> JWTSettings
+jwtSettings jwk = JWTSettings
+  { signingKey      = jwk
+  , jwtAlg          = Just HS256
+  , validationKeys  = pure $ JWKSet [jwk]
+  , audienceMatches = const Matches
+  }
+
+-- | Reads 'JWK' from file or generates new one in case of failure, then
+-- builds 'JWTSettings' with that 'JWK'.
+buildJwtSettings :: FilePath -> IO JWTSettings
+buildJwtSettings path =
+  fmap jwtSettings . E.catchError (readKey path) $ \(_ :: IOError) -> do
+    key <- generateSecret
+    writeFileBS path key
+    pure $ fromSecret key

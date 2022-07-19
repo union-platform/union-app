@@ -78,6 +78,19 @@ packages:
       sha256: e5e5aadb11d695f9f1792a6d8f8faa4131afc23713335ff93dab6b0806bea510
   original:
     hackage: zigzag-0.0.1.0
+- completed:
+    subdir: servant-auth/servant-auth-server
+    name: servant-auth-server
+    version: 0.4.7.0
+    git: https://github.com/haskell-servant/servant.git
+    pantry-tree:
+      size: 1469
+      sha256: 6bf429779c3d0e8e591c8e761ca9357fab9558a5d209b019dd4cb65d43c7fdb9
+    commit: 3006e90126c3bed740ef2aa368586837f18b459f
+  original:
+    subdir: servant-auth/servant-auth-server
+    git: https://github.com/haskell-servant/servant.git
+    commit: 3006e90126c3bed740ef2aa368586837f18b459f
 snapshots:
 - completed:
     size: 618740

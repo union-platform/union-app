@@ -11,6 +11,7 @@ module Test.Mock
   , withClient
   , rootClient
   , apiStatusCode
+  , mkToken
   ) where
 
 import Relude
@@ -20,6 +21,7 @@ import Data.Default (def)
 import Network.HTTP.Client (defaultManagerSettings, newManager)
 import Network.HTTP.Types (Status)
 import Network.Wai.Handler.Warp (testWithApplication)
+import Servant.Auth.Client (Token(..))
 import Servant.Client
   ( BaseUrl(..)
   , ClientError(..)
@@ -31,20 +33,23 @@ import Servant.Client
   )
 import Servant.Client.Core (RunClient)
 import Servant.Client.Generic (AsClientT, genericClient)
-import Servant.Server (Application, serve)
+import Servant.Server (Application, serveWithContext)
 import System.Process (readProcess)
 
 import qualified Core
 
 import Core.Db (DbCredentials(..))
-import Core.Jwt (JwtSecret(..))
 import Core.Logger (emptyLogger)
 import Core.Monad (runApp)
-import Core.Sender (AuthToken(..), SenderAccount(..))
-import Union.App.Configuration (Config(..), DatabaseConfig(..), loadConfig)
+import Core.Sender (AuthToken(..), Phone(..), SenderAccount(..))
+import Union.Account.Schema (Account(..), AccountId)
+import Union.Account.Service (createAccount)
+import Union.App.Configuration
+  (Config(..), DatabaseConfig(..), jwtSettings, loadConfig)
 import Union.App.Db (runDb)
 import Union.App.Env (Env(..))
 import Union.App.Error (Error)
+import Union.Auth (authCtx, generateJwtToken, generateKey, unJwtToken)
 import Union.Server (Endpoints, api, server)
 
 
@@ -63,8 +68,8 @@ mockEnv = do
   db  <- DbCredentials . toText <$> generateTempDb
   let eConfig = cfg { cDatabase = (cDatabase cfg) { dcCredentials = db } }
   let DatabaseConfig {..} = cDatabase eConfig
-  let eLogger             = emptyLogger
-  let eJwtSecret          = JwtSecret "0123456789"
+  let eLogger = emptyLogger
+  eJwtSettings <- jwtSettings <$> generateKey
   let eSenderService = (SenderAccount "0123456789", AuthToken "0123456789")
   Core.withDb dcPoolSize dcTimeout dcCredentials $ \eDbPool -> pure Env { .. }
 
@@ -79,7 +84,7 @@ initMockApp env = runApp env $ do
   void . runDb . Core.migrate $ dcMigrations cDatabase
 
 mockApplication :: Env -> Application
-mockApplication = serve api . server
+mockApplication env = serveWithContext api (authCtx env) $ server env
 
 -- | Creating a new Manager is a relatively expensive operation, so we will try
 -- share a single Manager between tests.
@@ -103,3 +108,9 @@ apiStatusCode :: Status -> ClientError -> Bool
 apiStatusCode status servantError = case servantError of
   FailureResponse _ response -> responseStatusCode response == status
   _                          -> False
+
+-- | Creates account with given 'Phone' and generates 'Token' for auth.
+mkToken :: Env -> Phone -> IO (AccountId, Token)
+mkToken env phone = runMockApp env $ do
+  aId <- aAccountId <$> createAccount phone
+  (aId, ) . Token . toStrict . unJwtToken <$> generateJwtToken aId

@@ -14,10 +14,10 @@ module Union.App.Env
   , kill
 
     -- * Constraints
+  , WithEnv
   , WithDb
   , WithLog
   , WithError
-  , WithJwt
   , WithSender
   ) where
 
@@ -25,6 +25,7 @@ import Relude
 
 import Data.Default (def)
 import Network.HTTP.Req (HttpException(..))
+import Servant.Auth.Server (JWTSettings)
 import Servant.Server.Generic (AsServerT)
 import UnliftIO.Exception (catch)
 
@@ -33,13 +34,12 @@ import qualified Service.Twilio as Twilio
 
 import Core.Db (DbCredentials(..), DbPool)
 import Core.Has (Has)
-import Core.Jwt (JwtPayload, JwtSecret(..), JwtToken, MonadJwt)
 import Core.Logger (Log, Logger, Severity(..), logError, logException)
 import Core.Sender
   (AuthToken, ConfirmationCode, MonadSender(..), Phone, SenderAccount)
-import Core.Time (Seconds)
 
-import Union.App.Configuration (Config(..), DatabaseConfig(..), loadConfig)
+import Union.App.Configuration
+  (Config(..), DatabaseConfig(..), buildJwtSettings, loadConfig)
 import Union.App.Error (Error(..))
 
 
@@ -49,6 +49,9 @@ type App = Core.App Error Env
 -- | Union application server.
 type Union = AsServerT App
 
+-- | Constraint to actions with access to 'Env'.
+type WithEnv m = MonadReader Env m
+
 -- | Constraint to actions with DB access.
 type WithDb m = Core.WithDb Env m
 
@@ -57,9 +60,6 @@ type WithLog m = Core.WithLog Env m
 
 -- | Constraint to actions that can throw and catch pure errors with call-stack.
 type WithError m = Core.WithError Error m
-
--- | Constraint to actions with Jwt generation / verification.
-type WithJwt m = MonadJwt Int64 m
 
 -- | Constraint to actions with Sender service.
 type WithSender m = MonadSender m
@@ -73,13 +73,14 @@ data Env = Env
   { eConfig        :: !Config
   , eDbPool        :: !DbPool
   , eLogger        :: !(Logger App)
-  , eJwtSecret     :: !JwtSecret
+  , eJwtSettings   :: !JWTSettings
+    -- ^ Stores 'JWTSettings' required for authentication.
   , eSenderService :: !(SenderAccount, AuthToken)
     -- ^ Stores Twilio account and auth token.
   }
   deriving (Has Config)                     via EnvField "eConfig"
   deriving (Has DbPool)                     via EnvField "eDbPool"
-  deriving (Has JwtSecret)                  via EnvField "eJwtSecret"
+  deriving (Has JWTSettings)                via EnvField "eJwtSettings"
   deriving (Has (SenderAccount, AuthToken)) via EnvField "eSenderService"
 
 -- | Instance to specify how to get and update the 'Logger' stored inside
@@ -92,18 +93,6 @@ instance Core.HasLog Env Log App where
   setLogAction :: Logger App -> Env -> Env
   setLogAction newLogAction env = env { eLogger = newLogAction }
   {-# INLINE setLogAction #-}
-
--- | Instance to specify how to generate and verify a 'JwtToken'.
-instance (Integral a, Bounded a) => MonadJwt a App where
-  mkJwtToken :: Seconds -> JwtPayload a -> App JwtToken
-  mkJwtToken expire payload = do
-    secret <- Core.grab @JwtSecret
-    Core.mkJwtTokenImpl Core.encodeIntIdPayload secret expire payload
-
-  verifyJwtToken :: JwtToken -> App (Maybe (JwtPayload a))
-  verifyJwtToken token = do
-    secret <- Core.grab @JwtSecret
-    Core.verifyJwtTokenImpl Core.decodeIntIdPayload secret token
 
 -- | Instance to specify how to generate and send 'ConfirmationCode'.
 instance MonadSender App where
@@ -130,7 +119,7 @@ buildEnv path = do
   let eConfig = cfg { cDatabase = (cDatabase cfg) { dcCredentials = db } }
   let DatabaseConfig {..} = cDatabase eConfig
   let eLogger = Core.setLogger $ cSeverity cfg
-  eJwtSecret    <- JwtSecret <$> Core.mkRandomString 10
+  eJwtSettings  <- buildJwtSettings "./secret.jwk"
   senderAccount <- Twilio.findSenderAccount
   senderToken   <- Twilio.findAuthToken
   let eSenderService = (senderAccount, senderToken)

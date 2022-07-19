@@ -13,22 +13,45 @@ import Relude
 import Test.QuickCheck (Arbitrary(..))
 import Test.QuickCheck.Instances ()
 
-import Core.Jwt (JwtToken(..))
+import Core.Db (Id(..))
 import Core.Sender (ConfirmationCode(..), Phone(..))
-import Union.Account.Schema (UserAgent(..))
-import Union.Account.Types (RequestCodeReq(..), SignInReq(..), SignInResp(..))
+import Union.Account.Profile.Schema (Interest(..))
+import Union.Account.Profile.Types
+  (CreateInterestReq(..), CreateProfileReq(..), UpdateInterestsReq(..))
+import Union.Account.SignIn.Types
+  (AuthenticateReq(..), AuthenticateResp(..), RequestCodeReq(..), UserAgent(..))
+import Union.Auth (JwtToken, mkJwtToken)
+import Union.Search.Types (SuggestInterestsResp(..))
 
 
+deriving newtype instance Arbitrary (Id a)
 deriving newtype instance Arbitrary Phone
 deriving newtype instance Arbitrary ConfirmationCode
-deriving newtype instance Arbitrary JwtToken
 deriving newtype instance Arbitrary UserAgent
+
+instance Arbitrary JwtToken where
+  arbitrary = mkJwtToken <$> arbitrary
 
 instance Arbitrary RequestCodeReq where
   arbitrary = RequestCodeReq <$> arbitrary
 
-instance Arbitrary SignInReq where
-  arbitrary = SignInReq <$> arbitrary <*> arbitrary
+instance Arbitrary AuthenticateReq where
+  arbitrary = AuthenticateReq <$> arbitrary <*> arbitrary
 
-instance Arbitrary SignInResp where
-  arbitrary = SignInResp <$> arbitrary
+instance Arbitrary AuthenticateResp where
+  arbitrary = AuthenticateResp <$> arbitrary
+
+instance Arbitrary CreateProfileReq where
+  arbitrary = CreateProfileReq <$> arbitrary
+
+instance Arbitrary CreateInterestReq where
+  arbitrary = CreateInterestReq <$> arbitrary
+
+instance Arbitrary UpdateInterestsReq where
+  arbitrary = UpdateInterestsReq <$> arbitrary
+
+instance f ~ Identity => Arbitrary (Interest f) where
+  arbitrary = Interest <$> arbitrary <*> arbitrary
+
+instance Arbitrary SuggestInterestsResp where
+  arbitrary = SuggestInterestsResp <$> arbitrary
